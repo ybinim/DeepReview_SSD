@@ -4,6 +4,7 @@
 #include <fstream>
 
 #include "ssd.h"
+#include "write.cpp"
 
 TEST(SSDTestGroup, ValidReadCommandTest)
 {
@@ -70,4 +71,27 @@ TEST(SSDTestGroup, ReadWithDataTest2)
 	std::getline(file, output);
 
 	EXPECT_EQ("0xBBBBBBBB", output);
+}
+
+TEST(SSDTestGroup, WriteWithDataTest)
+{
+	Write myWrite;
+	std::map<std::string, std::string> nand = { };
+	bool ret = myWrite.execute(nand, "2", "0xCCCCCCCC");
+	EXPECT_EQ(ret, true);
+}
+
+TEST(SSDTestGroup, WriteFileUpdateTest)
+{
+	Write myWrite;
+	std::map<std::string, std::string> nand = { };
+	std::string filePath = "ssd_nand.txt";
+	std::ifstream file(filePath.data());
+	std::string output = "";
+
+	bool ret = myWrite.execute(nand, "2", "0xCCCCCCCC");
+	EXPECT_EQ(ret, true);
+
+	std::getline(file, output);
+	EXPECT_EQ("2 0xCCCCCCCC", output);
 }
