@@ -35,11 +35,9 @@ public:
 		// 키가 존재하지 않는다면, 0x00000000 쓰기
 		if (it == nand.end()) {
 			outFile << "0x00000000";
-			std::cout << "Key " << addr << " NOT Found" << std::endl;
 		}
 		else {
 			outFile << it->second;
-			std::cout << "Key " << addr << " found! Value: " << it->second << std::endl;
 		}
 
 		// 파일 닫기

@@ -4,7 +4,6 @@
 #include <fstream>
 #include "SSD_Read.cpp"
 
-#if 0
 TEST(SSDTestGroup, ValidReadCommandTest)
 {
 	SSD mySsd;
@@ -25,7 +24,6 @@ TEST(SSDTestGroup, InvalidCommandTest)
 	bool ret = mySsd.run("D 0");
 	EXPECT_EQ(ret, false);
 }
-#endif
 
 TEST(SSDTestGroup, ReadWithDataTestInvalidAddr)
 {
