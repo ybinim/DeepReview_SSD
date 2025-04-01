@@ -2,9 +2,10 @@
 #include <string>
 #include <map>
 #include <fstream>
-
 #include "ssd.h"
+#include "SSD_Read.cpp"
 #include "write.cpp"
+
 
 TEST(SSDTestGroup, ValidReadCommandTest)
 {
@@ -27,48 +28,97 @@ TEST(SSDTestGroup, InvalidCommandTest)
 	EXPECT_EQ(ret, false);
 }
 
-TEST(SSDTestGroup, ReadWithDataTest)
+TEST(SSDTestGroup, ReadWithDataTestInvalidAddr)
 {
-	Read myRead;
+	ReadSSD myRead;
 	std::map<int, std::string> nand = {
-		{0, "0xAAAAAAAA"},
-		{1, "0xBBBBBBBB"}
+		{-1, "0xAAAAAAAA"},
 	};
+
+	myRead.execute(nand, -1);
+
 	std::string filePath = "ssd_output.txt";
 	std::ifstream file(filePath.data());
 	std::string output = "";
 
-	myRead.execute(&nand, "0");
+	ASSERT_EQ(true, file.good());
+
+	std::getline(file, output);
+	file.close();
+
+	EXPECT_EQ("ERROR", output);
+}
+
+TEST(SSDTestGroup, ReadWithDataTestNotExistKey)
+{
+	ReadSSD myRead;
+	std::map<int, std::string> nand = {
+		{0, "0xAAAAAAAA"},
+		{1, "0xBBBBBBBB"}
+	};
+
+	myRead.execute(nand, 3);
+
+	std::string filePath = "ssd_output.txt";
+	std::ifstream file(filePath.data());
+	std::string output = "";
+
+	ASSERT_EQ(true, file.good());
+
+	std::getline(file, output);
+	file.close();
+
+	EXPECT_EQ("0x00000000", output);
+}
+
+TEST(SSDTestGroup, ReadWithDataTest)
+{
+	ReadSSD myRead;
+	std::map<int, std::string> nand = {
+		{0, "0xAAAAAAAA"},
+		{1, "0xBBBBBBBB"}
+	};
+
+	myRead.execute(nand, 0);
+
+	std::string filePath = "ssd_output.txt";
+	std::ifstream file(filePath.data());
+	std::string output = "";
 	
 	ASSERT_EQ(true, file.good());
 
 	std::getline(file, output);
+	file.close();
 
 	EXPECT_EQ("0xAAAAAAAA", output);
 }
 
 TEST(SSDTestGroup, ReadWithDataTest2)
 {
-	Read myRead;
+	ReadSSD myRead;
 	std::map<int, std::string> nand = {
 		{0, "0xAAAAAAAA"},
 		{1, "0xBBBBBBBB"}
 	};
+
+	myRead.execute(nand, 0);
+
 	std::string filePath = "ssd_output.txt";
 	std::ifstream file(filePath.data());
 	std::string output = "";
 
-	myRead.execute(&nand, "0");
-
 	ASSERT_EQ(true, file.good());
 
 	std::getline(file, output);
+	file.close();
 
 	EXPECT_EQ("0xAAAAAAAA", output);
 
-	myRead.execute(&nand, "1");
+	std::ifstream file2(filePath.data());
+	myRead.execute(nand, 1);
 
-	std::getline(file, output);
+	std::getline(file2, output);
+	file2.close();
 
 	EXPECT_EQ("0xBBBBBBBB", output);
 }
@@ -95,3 +145,4 @@ TEST(SSDTestGroup, WriteFileUpdateTest)
 	std::getline(file, output);
 	EXPECT_EQ("2 0xCCCCCCCC", output);
 }
+
