@@ -6,6 +6,7 @@
 #include "SSD_Read.cpp"
 #include "write.cpp"
 
+using namespace testing;
 
 TEST(SSDTestGroup, ValidReadCommandTest)
 {
@@ -28,99 +29,78 @@ TEST(SSDTestGroup, InvalidCommandTest)
 	EXPECT_EQ(ret, false);
 }
 
-TEST(SSDTestGroup, ReadWithDataTestInvalidAddr)
-{
-	ReadSSD myRead;
+class ReadSSDFixture : public Test {
+public:
+	void ValidCheckOfOutputFile(std::string expected) {
+		std::ifstream file(outputFilePath.data());
+		std::string actual = "";
+
+		ASSERT_EQ(true, file.good());
+
+		std::getline(file, actual);
+		file.close();
+
+		EXPECT_EQ(expected, actual);
+	}
+
 	std::map<int, std::string> nand = {
-		{-1, "0xAAAAAAAA"},
+	{0, "0xAAAAAAAA"},
+	{1, "0xBBBBBBBB"},
+	{99, "0xFFFFFFFF"},
 	};
 
-	myRead.execute(nand, -1);
+	ReadSSD myRead;
+private:
+	const std::string outputFilePath = "ssd_output.txt";
+};
 
-	std::string filePath = "ssd_output.txt";
-	std::ifstream file(filePath.data());
-	std::string output = "";
+TEST_F(ReadSSDFixture, ReadInvalidAddrTest)
+{
+	std::map<int, std::string> invalidAddr = {
+		{-1, "0xAAAAAAAA"},
+		{100, "0xAAAAAAAA"},
+	};
 
-	ASSERT_EQ(true, file.good());
+	myRead.execute(invalidAddr, -1);
 
-	std::getline(file, output);
-	file.close();
+	ValidCheckOfOutputFile("ERROR");
 
-	EXPECT_EQ("ERROR", output);
+	myRead.execute(invalidAddr, 100);
+
+	ValidCheckOfOutputFile("ERROR");
 }
 
-TEST(SSDTestGroup, ReadWithDataTestNotExistKey)
+TEST_F(ReadSSDFixture, ReadFromUninitializedMemory)
 {
-	ReadSSD myRead;
-	std::map<int, std::string> nand = {
-		{0, "0xAAAAAAAA"},
-		{1, "0xBBBBBBBB"}
-	};
-
 	myRead.execute(nand, 3);
 
-	std::string filePath = "ssd_output.txt";
-	std::ifstream file(filePath.data());
-	std::string output = "";
+	ValidCheckOfOutputFile("0x00000000");
 
-	ASSERT_EQ(true, file.good());
+	myRead.execute(nand, 98);
 
-	std::getline(file, output);
-	file.close();
-
-	EXPECT_EQ("0x00000000", output);
+	ValidCheckOfOutputFile("0x00000000");
 }
 
-TEST(SSDTestGroup, ReadWithDataTest)
+TEST_F(ReadSSDFixture, ReadWithDataTest)
 {
-	ReadSSD myRead;
-	std::map<int, std::string> nand = {
-		{0, "0xAAAAAAAA"},
-		{1, "0xBBBBBBBB"}
-	};
-
 	myRead.execute(nand, 0);
 
-	std::string filePath = "ssd_output.txt";
-	std::ifstream file(filePath.data());
-	std::string output = "";
-	
-	ASSERT_EQ(true, file.good());
-
-	std::getline(file, output);
-	file.close();
-
-	EXPECT_EQ("0xAAAAAAAA", output);
+	ValidCheckOfOutputFile("0xAAAAAAAA");
 }
 
-TEST(SSDTestGroup, ReadWithDataTest2)
+TEST_F(ReadSSDFixture, ReadWithDataTest2)
 {
-	ReadSSD myRead;
-	std::map<int, std::string> nand = {
-		{0, "0xAAAAAAAA"},
-		{1, "0xBBBBBBBB"}
-	};
-
 	myRead.execute(nand, 0);
 
-	std::string filePath = "ssd_output.txt";
-	std::ifstream file(filePath.data());
-	std::string output = "";
+	ValidCheckOfOutputFile("0xAAAAAAAA");
 
-	ASSERT_EQ(true, file.good());
-
-	std::getline(file, output);
-	file.close();
-
-	EXPECT_EQ("0xAAAAAAAA", output);
-
-	std::ifstream file2(filePath.data());
 	myRead.execute(nand, 1);
 
-	std::getline(file2, output);
-	file2.close();
+	ValidCheckOfOutputFile("0xBBBBBBBB");
 
-	EXPECT_EQ("0xBBBBBBBB", output);
+	myRead.execute(nand, 99);
+
+	ValidCheckOfOutputFile("0xFFFFFFFF");
 }
 
 TEST(SSDTestGroup, WriteWithDataTest)
@@ -145,4 +125,3 @@ TEST(SSDTestGroup, WriteFileUpdateTest)
 	std::getline(file, output);
 	EXPECT_EQ("2 0xCCCCCCCC", output);
 }
-
