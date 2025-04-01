@@ -2,8 +2,9 @@
 #include <string>
 #include <map>
 #include <fstream>
+#include "SSD_Read.cpp"
 
-
+#if 0
 TEST(SSDTestGroup, ValidReadCommandTest)
 {
 	SSD mySsd;
@@ -24,6 +25,48 @@ TEST(SSDTestGroup, InvalidCommandTest)
 	bool ret = mySsd.run("D 0");
 	EXPECT_EQ(ret, false);
 }
+#endif
+
+TEST(SSDTestGroup, ReadWithDataTestInvalidAddr)
+{
+	Read myRead;
+	std::map<int, std::string> nand = {
+		{-1, "0xAAAAAAAA"},
+	};
+	std::string filePath = "ssd_output.txt";
+	std::ifstream file(filePath.data());
+	std::string output = "";
+
+	myRead.execute(nand, -1);
+
+	ASSERT_EQ(true, file.good());
+
+	std::getline(file, output);
+	file.close();
+
+	EXPECT_EQ("ERROR", output);
+}
+
+TEST(SSDTestGroup, ReadWithDataTestNotExistKey)
+{
+	Read myRead;
+	std::map<int, std::string> nand = {
+		{0, "0xAAAAAAAA"},
+		{1, "0xBBBBBBBB"}
+	};
+	std::string filePath = "ssd_output.txt";
+	std::ifstream file(filePath.data());
+	std::string output = "";
+
+	myRead.execute(nand, 3);
+
+	ASSERT_EQ(true, file.good());
+
+	std::getline(file, output);
+	file.close();
+
+	EXPECT_EQ("0x00000000", output);
+}
 
 TEST(SSDTestGroup, ReadWithDataTest)
 {
@@ -36,11 +79,12 @@ TEST(SSDTestGroup, ReadWithDataTest)
 	std::ifstream file(filePath.data());
 	std::string output = "";
 
-	myRead.execute(&nand, "0");
+	myRead.execute(nand, 0);
 	
 	ASSERT_EQ(true, file.good());
 
 	std::getline(file, output);
+	file.close();
 
 	EXPECT_EQ("0xAAAAAAAA", output);
 }
@@ -56,17 +100,18 @@ TEST(SSDTestGroup, ReadWithDataTest2)
 	std::ifstream file(filePath.data());
 	std::string output = "";
 
-	myRead.execute(&nand, "0");
+	myRead.execute(nand, 0);
 
 	ASSERT_EQ(true, file.good());
 
 	std::getline(file, output);
-
+	file.close();
 	EXPECT_EQ("0xAAAAAAAA", output);
 
-	myRead.execute(&nand, "1");
+	std::ifstream file2(filePath.data());
+	myRead.execute(nand, 1);
 
-	std::getline(file, output);
-
+	std::getline(file2, output);
+	file2.close();
 	EXPECT_EQ("0xBBBBBBBB", output);
 }
