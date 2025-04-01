@@ -127,7 +127,7 @@ TEST(SSDTestGroup, WriteWithDataTest)
 {
 	WriteSSD myWrite;
 	std::map<int, std::string> nand = { };
-	bool ret = myWrite.execute(nand, "2", "0xCCCCCCCC");
+	bool ret = myWrite.execute(nand, 2, "0xCCCCCCCC");
 	EXPECT_EQ(ret, true);
 }
 
