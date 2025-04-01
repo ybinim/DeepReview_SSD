@@ -3,15 +3,7 @@
 #include <map>
 #include <fstream>
 
-#if 0
-Read
-• ssd R[LBA]
-• ssd_output.txt 에 읽은 값이 적힌다. 기존 데이터는 사라진다.
-• 기록이 한적이 없는 LBA 를 읽으면 0x00000000 으로 읽힌다
-• 잘못된 LBA 범위가 입력되면 ssd_output.txt 에 ERROR 가 기록된다
-#endif
-
-class Read {
+class ReadSSD {
 public:
 	void execute(std::map<int, std::string>& nand, int addr) {
 		// ofstream 객체 생성 (파일이 없다면 생성되고, 있으면 열립니다)
