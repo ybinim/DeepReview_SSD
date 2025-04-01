@@ -133,6 +133,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ssd.cpp" />
     <ClCompile Include="SSD_test.cpp" />
+    <ClCompile Include="write.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ssd.h" />
