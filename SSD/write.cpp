@@ -1,5 +1,5 @@
 
-class Write {
+class WriteSSD {
 public :
 
 

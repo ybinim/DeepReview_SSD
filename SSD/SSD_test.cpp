@@ -75,7 +75,7 @@ TEST(SSDTestGroup, ReadWithDataTest2)
 
 TEST(SSDTestGroup, WriteWithDataTest)
 {
-	Write myWrite;
+	WriteSSD myWrite;
 	std::map<std::string, std::string> nand = { };
 	bool ret = myWrite.execute(nand, "2", "0xCCCCCCCC");
 	EXPECT_EQ(ret, true);
@@ -83,7 +83,7 @@ TEST(SSDTestGroup, WriteWithDataTest)
 
 TEST(SSDTestGroup, WriteFileUpdateTest)
 {
-	Write myWrite;
+	WriteSSD myWrite;
 	std::map<std::string, std::string> nand = { };
 	std::string filePath = "ssd_nand.txt";
 	std::ifstream file(filePath.data());
