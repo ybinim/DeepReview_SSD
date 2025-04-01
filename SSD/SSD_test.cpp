@@ -38,7 +38,7 @@ TEST(SSDTestGroup, ReadWithDataTest)
 
 	myRead.execute(&nand, "0");
 	
-	ASSERT_EQ(true, f.good());
+	ASSERT_EQ(true, file.good());
 
 	std::getline(file, output);
 
@@ -58,7 +58,7 @@ TEST(SSDTestGroup, ReadWithDataTest2)
 
 	myRead.execute(&nand, "0");
 
-	ASSERT_EQ(true, f.good());
+	ASSERT_EQ(true, file.good());
 
 	std::getline(file, output);
 
