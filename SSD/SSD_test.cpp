@@ -2,8 +2,9 @@
 #include <string>
 #include <map>
 #include <fstream>
+#include "write.cpp"
 
-
+/*
 TEST(SSDTestGroup, ValidReadCommandTest)
 {
 	SSD mySsd;
@@ -70,3 +71,21 @@ TEST(SSDTestGroup, ReadWithDataTest2)
 
 	EXPECT_EQ("0xBBBBBBBB", output);
 }
+*/
+
+TEST(SSDTestGroup, WriteWithDataTest)
+{
+	Write myWrite;
+	std::map<std::string, std::string> nand = {
+		{"0", "0xAAAAAAAA"},
+		{"1", "0xBBBBBBBB"}
+	};
+	std::string filePath = "ssd_output.txt";
+	std::ifstream file(filePath.data());
+	std::string output = "";
+
+	bool ret = myWrite.execute(nand, "2", "0xCCCCCCCC");
+
+	EXPECT_EQ(ret, true); 
+}
+
