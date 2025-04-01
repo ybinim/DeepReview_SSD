@@ -1,4 +1,5 @@
 #include "gmock/gmock.h"
+#include "TestShell.cpp"
 
 TEST(TestShellTestGroup, TestShellParamTest)
 {
