@@ -131,11 +131,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="SSD_Read.cpp" />
+    <ClCompile Include="ssd.cpp" />
     <ClCompile Include="SSD_test.cpp" />
+    <ClCompile Include="SSD_Read.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="ssd_output.txt" />
+    <ClInclude Include="ssd.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -2,6 +2,7 @@
 #include <string>
 #include <map>
 #include <fstream>
+#include "ssd.h"
 #include "SSD_Read.cpp"
 
 TEST(SSDTestGroup, ValidReadCommandTest)
