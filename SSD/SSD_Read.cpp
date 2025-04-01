@@ -38,5 +38,5 @@ public:
 	}
 
 private:
-	std::string filePath = "ssd_output.txt";
+	const std::string filePath = "ssd_output.txt";
 };

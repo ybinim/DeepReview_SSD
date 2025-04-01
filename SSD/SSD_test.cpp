@@ -122,7 +122,7 @@ TEST(SSDTestGroup, ReadWithDataTest2)
 
 	EXPECT_EQ("0xBBBBBBBB", output);
 }
-#if 0
+
 TEST(SSDTestGroup, WriteWithDataTest)
 {
 	WriteSSD myWrite;
@@ -145,4 +145,4 @@ TEST(SSDTestGroup, WriteFileUpdateTest)
 	std::getline(file, output);
 	EXPECT_EQ("2 0xCCCCCCCC", output);
 }
-#endif
+
