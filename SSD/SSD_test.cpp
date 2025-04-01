@@ -3,7 +3,7 @@
 #include <map>
 #include <fstream>
 
-#include "ssd.cpp"
+#include "ssd.h"
 
 TEST(SSDTestGroup, ValidReadCommandTest)
 {

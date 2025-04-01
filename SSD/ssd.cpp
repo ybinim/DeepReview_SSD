@@ -1,9 +1,16 @@
-#include <string>
+#include "ssd.h"
 
-class SSD {
-public:
-	bool run(std::string input)
+using namespace std;
+
+bool 
+SSD::run(string input)
+{
+	string command = input.substr(0, 1);
+
+	if (command == "W" || command == "R")
 	{
 		return true;
 	}
-};
+
+	return false;
+}
