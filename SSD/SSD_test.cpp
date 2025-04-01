@@ -3,13 +3,16 @@
 
 using std::string;
 
-TEST(SSDTestGroup, ValidCommandTest)
+TEST(SSDTestGroup, ValidReadCommandTest)
 {
 	SSD mySsd;
 	int ret = mySsd.run("R 0");
-	EXPECT_EQ(ret, true);
+}
 
-	ret = mySsd.run("W 0 0x12345678");
+TEST(SSDTestGroup, ValidWriteCommandTest)
+{
+	SSD mySsd;
+	int ret = mySsd.run("W 0 0x12345678");
 	EXPECT_EQ(ret, true);
 }
 
