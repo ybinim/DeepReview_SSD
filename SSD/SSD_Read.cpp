@@ -8,7 +8,6 @@ public:
 	void execute(const std::map<int, std::string>& nand, int addr) {
 		std::ofstream outputFile(filePath, std::ios::trunc);
 		if (!outputFile.is_open()) {
-			std::cout << "Failed to open file : " << filePath << std::endl;
 			return;
 		}
 
