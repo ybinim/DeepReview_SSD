@@ -13,8 +13,7 @@ public:
     bool execute(std::map<int, std::string>& nand, int lba, const std::string& data);
 
 private:
-    std::map<int, std::string> myMap;
-    bool updateSSDNandFile();
+    bool updateSSDNandFile(std::map<int, std::string>& nand);
 };
 
 #endif
