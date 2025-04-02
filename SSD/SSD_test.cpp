@@ -2,42 +2,24 @@
 #include <string>
 #include <map>
 #include <fstream>
+#include <cstdio>
 
 #include "ssd.h"
 
 using namespace testing;
 
-TEST(SSDTestGroup, txtFileNotExistTest)
-{
-	SSD mySsd;
-	bool ret = mySsd.run("R 0");
-	EXPECT_EQ(ret, false);
-}
+class SSDFixture : public Test {
+protected:
+	void SetUp() override {
+		deleteOutPutFile();
+		deleteNandFile();
+	}
 
-TEST(SSDTestGroup, ValidWriteCommandTest)
-{
-	SSD mySsd;
-	bool ret = mySsd.run("W 0 0x12345678");
-	EXPECT_EQ(ret, true);
-}
+	void TearDown() override {
 
-TEST(SSDTestGroup, ValidReadCommandTest)
-{
-	SSD mySsd;
-	bool ret = mySsd.run("R 0");
-	EXPECT_EQ(ret, true);
-}
+	}
 
-TEST(SSDTestGroup, InvalidCommandTest)
-{
-	SSD mySsd;
-	bool ret = mySsd.run("D 0");
-	EXPECT_EQ(ret, false);
-}
-
-class ReadSSDFixture : public Test {
-public:
-	void ValidCheckOfOutputFile(std::string expected) {
+	void validCheckOfOutputFile(std::string expected) {
 		std::ifstream file(outputFilePath.data());
 		std::string actual = "";
 
@@ -49,97 +31,157 @@ public:
 		EXPECT_EQ(expected, actual);
 	}
 
+	void deleteFile(std::string file) {
+		remove(file.c_str());
+	}
+
+	void deleteOutPutFile() {
+		deleteFile(outputFilePath);
+	}
+
+	void deleteNandFile() {
+		deleteFile(nandFilePath);
+	}
+
+	void prepareRead() {
+		std::ofstream file(nandFilePath.c_str());
+		for (auto& data : nand) {
+			file << data.first << " " << data.second;
+		}
+		file.close();
+	}
+
 	std::map<int, std::string> nand = {
 	{0, "0xAAAAAAAA"},
 	{1, "0xBBBBBBBB"},
 	{99, "0xFFFFFFFF"},
 	};
 
+	SSD mySsd;
 	ReadSSD myRead;
-private:
+	WriteSSD myWrite;
+
 	const std::string outputFilePath = "ssd_output.txt";
+	const std::string nandFilePath = "ssd_nand.txt";
 };
 
-TEST_F(ReadSSDFixture, ReadInvalidAddrTest)
+TEST_F(SSDFixture, SSDTest_ValidWriteCommand)
 {
-	std::map<int, std::string> invalidAddr = {
-		{-1, "0xAAAAAAAA"},
-		{100, "0xAAAAAAAA"},
-	};
-
-	myRead.execute(invalidAddr, -1);
-
-	ValidCheckOfOutputFile("ERROR");
-
-	myRead.execute(invalidAddr, 100);
-
-	ValidCheckOfOutputFile("ERROR");
+	bool ret = mySsd.run("W 0 0x12345678");
+	EXPECT_EQ(ret, true);
 }
 
-TEST_F(ReadSSDFixture, ReadFromUninitializedMemory)
+TEST_F(SSDFixture, SSDTest_ValidReadCommand)
 {
-	myRead.execute(nand, 3);
+	bool ret = mySsd.run("W 0 0x12345678");
+	EXPECT_EQ(ret, true);
 
-	ValidCheckOfOutputFile("0x00000000");
+	ret = mySsd.run("R 0");
+	validCheckOfOutputFile("0x12345678");
+}
+
+TEST_F(SSDFixture, SSDTest_InvalidCommand)
+{
+	bool ret = mySsd.run("D 0");
+	EXPECT_EQ(ret, false);
+}
+
+TEST_F(SSDFixture, SSDTest_InvalidLBAWriteCommand1)
+{
+	bool ret = mySsd.run("W 100 0xCAFECAFE");
+	EXPECT_EQ(ret, false);
+	validCheckOfOutputFile("ERROR");
+}
+
+TEST_F(SSDFixture, SSDTest_InvalidLBAWriteCommand2)
+{
+	bool ret = mySsd.run("W !!! 0xCAFECAFE");
+	EXPECT_EQ(ret, false);
+	validCheckOfOutputFile("ERROR");
+}
+
+TEST_F(SSDFixture, SSDTest_InvalidLBAReadCommand1)
+{
+	mySsd.run("R 999");
+	validCheckOfOutputFile("ERROR");
+}
+
+TEST_F(SSDFixture, SSDTest_InvalidLBAReadCommand2)
+{
+	mySsd.run("R !~@");
+	validCheckOfOutputFile("ERROR");
+}
+
+TEST_F(SSDFixture, InvalidAddrTest)
+{
+	mySsd.run("R -1 0xAAAAAAAA");
+	validCheckOfOutputFile("ERROR");
+
+	mySsd.run("R -100 0xBBBBBBBB");
+	validCheckOfOutputFile("ERROR");
+}
+
+TEST_F(SSDFixture, ReadFromUninitializedMemory)
+{
+	prepareRead();
+
+	myRead.execute(nand, 3);
+	validCheckOfOutputFile("0x00000000");
 
 	myRead.execute(nand, 98);
-
-	ValidCheckOfOutputFile("0x00000000");
+	validCheckOfOutputFile("0x00000000");
 }
 
-TEST_F(ReadSSDFixture, ReadWithDataTest)
+TEST_F(SSDFixture, ReadWithDataTest)
 {
-	myRead.execute(nand, 0);
+	prepareRead();
 
-	ValidCheckOfOutputFile("0xAAAAAAAA");
+	myRead.execute(nand, 0);
+	validCheckOfOutputFile("0xAAAAAAAA");
 }
 
-TEST_F(ReadSSDFixture, ReadWithDataTest2)
+TEST_F(SSDFixture, ReadWithDataTest2)
 {
-	myRead.execute(nand, 0);
+	prepareRead();
 
-	ValidCheckOfOutputFile("0xAAAAAAAA");
+	myRead.execute(nand, 0);
+	validCheckOfOutputFile("0xAAAAAAAA");
 
 	myRead.execute(nand, 1);
-
-	ValidCheckOfOutputFile("0xBBBBBBBB");
+	validCheckOfOutputFile("0xBBBBBBBB");
 
 	myRead.execute(nand, 99);
-
-	ValidCheckOfOutputFile("0xFFFFFFFF");
+	validCheckOfOutputFile("0xFFFFFFFF");
 }
 
-TEST(SSDTestGroup, WriteWithDataTest)
+TEST_F(SSDFixture, WriteWithDataTest)
 {
-	WriteSSD myWrite;
 	std::map<int, std::string> nand = { };
 	bool ret = myWrite.execute(nand, 2, "0xCCCCCCCC");
 	EXPECT_EQ(ret, true);
 }
 
-TEST(SSDTestGroup, WriteFileUpdateTest)
+TEST_F(SSDFixture, WriteFileUpdateTest)
 {
-	WriteSSD myWrite;
 	std::map<int, std::string> nand = { };
-	std::string filePath = "ssd_nand.txt";
-	std::ifstream file(filePath.data());
-	std::string output = "";
-
 	myWrite.execute(nand, 2, "0xCCCCCCCC");
+
+	std::ifstream file(nandFilePath.c_str());
+	std::string output = "";
 	std::getline(file, output);
 	EXPECT_EQ("2 0xCCCCCCCC", output);
 }
 
-TEST(SSDTestGroup, WriteFileUpdateChangeMapValueTest)
+TEST_F(SSDFixture, WriteFileUpdateChangeMapValueTest)
 {
 	WriteSSD myWrite;
 	std::map<int, std::string> nand = { };
-	std::string filePath = "ssd_nand.txt";
-	std::ifstream file(filePath.data());
-	std::string output = "";
 
 	myWrite.execute(nand, 2, "0xCCCCCCCC");
 	myWrite.execute(nand, 2, "0xDDDDDDDD");
+
+	std::ifstream file(nandFilePath.c_str());
+	std::string output = "";
 	std::getline(file, output);
 	EXPECT_EQ("2 0xDDDDDDDD", output);
 }

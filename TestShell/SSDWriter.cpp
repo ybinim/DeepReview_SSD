@@ -36,7 +36,5 @@ int SSDWriter::execute(vector<string>& param) {
 	command += data;
 
 	int ret = system(command.c_str());
-
-	cout << "[Write] Done" << endl;
 	return ret;
 }

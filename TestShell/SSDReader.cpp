@@ -27,7 +27,7 @@ int SSDReader::execute(vector<string>& param) {
 	string data = "";
 	getline(outputFile, data);
 
-	cout << "[Read] LBA " << lba << " : " << data;
+	cout << "[Read] LBA " << lba << " : " << data << endl;
 
 	return ret;
 }
