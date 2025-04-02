@@ -65,7 +65,13 @@ public:
 			}
 		}
 
-		nandText.emplace(stoi(lba), data);
+		auto it = nandText.find(stoi(lba));
+		if (it != nandText.end()) {
+			it->second = data;
+		}
+		else {
+			nandText.emplace(stoi(lba), data);
+		}
 		return 0;
 	}
 };
@@ -80,6 +86,8 @@ public:
 protected:
 	void SetUp() override {
 		shell = new TestShell(&reader, &writer);
+		nandText.clear();
+		outputText = "";
 	}
 
 	void TearDown() override {
@@ -107,8 +115,26 @@ TEST_F(TestShellTestFixture, InvalidCommandTest)
 
 TEST_F(TestShellTestFixture, WriteTest)
 {
-	int ret = shell->run("write 3 0xAAAAAAAA");
+	int ret = shell->run("write 0 0xAAAAAAAA");
 	EXPECT_EQ(ret, 0);
+
+	auto it = nandText.find(0);
+	EXPECT_TRUE(it != nandText.end());
+	EXPECT_EQ(it->second, "0xAAAAAAAA");
+
+	ret = shell->run("write 1 0xBBBBBBBB");
+	EXPECT_EQ(ret, 0);
+
+	it = nandText.find(1);
+	EXPECT_TRUE(it != nandText.end());
+	EXPECT_EQ(it->second, "0xBBBBBBBB");
+
+	ret = shell->run("write 1 0xCCCCCCCC");
+	EXPECT_EQ(ret, 0);
+
+	it = nandText.find(1);
+	EXPECT_TRUE(it != nandText.end());
+	EXPECT_EQ(it->second, "0xCCCCCCCC");
 }
 
 TEST_F(TestShellTestFixture, WrongWriteTest)
@@ -130,6 +156,26 @@ TEST_F(TestShellTestFixture, ReadTest)
 {
 	int ret = shell->run("read 0");
 	EXPECT_EQ(ret, 0);
+	EXPECT_EQ(outputText, "0x00000000");
+}
+
+TEST_F(TestShellTestFixture, ReadTest2)
+{
+	nandText.emplace(0, "0xAAAAAAAA");
+	nandText.emplace(1, "0xBBBBBBBB");
+	nandText.emplace(99, "0xFFFFFFFF");
+
+	int ret = shell->run("read 0");
+	EXPECT_EQ(ret, 0);
+	EXPECT_EQ(outputText, "0xAAAAAAAA");
+
+	ret = shell->run("read 1");
+	EXPECT_EQ(ret, 0);
+	EXPECT_EQ(outputText, "0xBBBBBBBB");
+
+	ret = shell->run("read 99");
+	EXPECT_EQ(ret, 0);
+	EXPECT_EQ(outputText, "0xFFFFFFFF");
 }
 
 TEST_F(TestShellTestFixture, WrongReadTest)
