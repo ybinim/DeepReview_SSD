@@ -6,20 +6,14 @@ bool ReadSSD::execute(const std::map<int, std::string>& nand, int lba) {
 		return false;
 	}
 
-	if (lba < 0 || lba >= 100) {
-		outputFile << "ERROR";
-		outputFile.close();
-		return true;
-	}
-
 	auto it = nand.find(lba);
 	if (it == nand.end()) {
 		outputFile << VALUE_ZERO;
-		outputFile.close();
-		return true;
+	}
+	else {
+		outputFile << it->second;
 	}
 
-	outputFile << it->second;
 	outputFile.close();
 	return true;
 }
