@@ -1,4 +1,5 @@
 #include "TestShell.h"
+#include <iomanip>
 
 using namespace std;
 
@@ -22,7 +23,7 @@ int TestShell::run(string command) {
 
     }
     else if (param[0].compare("help") == 0) {
-
+        printHelp();
     }
     else {
         cout << "INVALID COMMAND" << endl;
@@ -42,4 +43,8 @@ vector<string> TestShell::parseCommand(string& command, char delimiter) {
     }
 
     return result;
+}
+
+void TestShell::printHelp() {
+
 }
