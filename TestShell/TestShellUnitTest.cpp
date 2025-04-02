@@ -219,3 +219,18 @@ TEST_F(TestShellTestFixture, InvalidFullWriteTest)
 	ret = shell->run("fullwrite 12345678");
 	EXPECT_EQ(ret, -2);
 }
+
+TEST_F(TestShellTestFixture, WriteReadAgingValidTest)
+{
+	int ret = shell->run("3_WriteReadAging");
+	EXPECT_EQ(ret, 0);
+
+	ret = shell->run("3_");
+	EXPECT_EQ(ret, 0);
+
+	ret = shell->run("3");
+	EXPECT_EQ(ret, -1);
+
+	ret = shell->run("3__");
+	EXPECT_EQ(ret, -1);
+}
