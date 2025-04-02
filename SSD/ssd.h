@@ -8,4 +8,5 @@ enum command {
 class SSD {
 public:
 	bool run(std::string input);
+	bool IsInvalidCommand(std::string command);
 };
