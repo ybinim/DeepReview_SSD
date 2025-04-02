@@ -1,22 +1,32 @@
-#include <string>
-#include <map>
-#include <fstream>
+#include "write.h"
 
-class WriteSSD {
-public:
-	bool update(std::map<int, std::string>& nand) {
-		std::ofstream outFile("ssd_nand.txt");
+bool WriteSSD::execute(std::map<int, std::string>& nand, int lba, const std::string& data) {
+	myMap = nand;
+	auto ret = myMap.emplace(lba, data);
 
-		outFile.is_open();
-		outFile << 2 << " " << "0xCCCCCCCC" << std::endl;
-		outFile.close();
-	
-		return true;
+	if (!ret.second) {
+		return false;
 	}
 
-	bool execute(std::map<int, std::string>& nand, int lba, const std::string& data) {
-		std::map<int, std::string> myMap = nand;
-		myMap.emplace(lba, data);
-		return true;
+	if (!updateSSDNandFile()) {
+		return false;
 	}
-};
+
+	return true;
+}
+
+bool WriteSSD::updateSSDNandFile() {
+	std::ofstream outFile(PATH_SSD_NAND_FILE);
+
+	if (!outFile.is_open()) {
+		return false;
+	}
+
+	for (const auto& pair : myMap) {
+		outFile << pair.first << " " << pair.second << std::endl;
+	}
+
+	outFile.close();
+	return true;
+}
+
