@@ -60,7 +60,7 @@ public:
 		}
 
 		for (char& c : data.substr(2, string::npos)) {
-			if (c < 'A' || c > 'F') {
+			if (!(c >= '0' && c <= '9') && !(c >= 'A' && c <= 'F')) {
 				return -2;
 			}
 		}
