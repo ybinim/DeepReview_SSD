@@ -189,3 +189,28 @@ TEST_F(TestShellTestFixture, WrongReadTest)
 	ret = shell->run("read 0 0xAAAAAAAA");
 	EXPECT_EQ(ret, -2);
 }
+
+TEST_F(TestShellTestFixture, FullWriteTest)
+{
+	int ret = shell->run("fullwrite 0xFFFFFFFF");
+	EXPECT_EQ(ret, 0);
+
+	EXPECT_EQ(nandText.size(), 100);
+	for (int i = 0; i < 100; i++) {
+		auto it = nandText.find(i);
+		ASSERT_TRUE(it != nandText.end());
+		EXPECT_EQ(it->second, "0xFFFFFFFF");
+	}
+}
+
+TEST_F(TestShellTestFixture, InvalidFullWriteTest)
+{
+	int ret = shell->run("fullwrite");
+	EXPECT_EQ(ret, -2);
+
+	ret = shell->run("fullwrite AAAAAAAAAA");
+	EXPECT_EQ(ret, -2);
+
+	ret = shell->run("fullwrite 12345678");
+	EXPECT_EQ(ret, -2);
+}
