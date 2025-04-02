@@ -8,6 +8,13 @@
 
 using namespace testing;
 
+TEST(SSDTestGroup, txtFileNotExistTest)
+{
+	SSD mySsd;
+	bool ret = mySsd.run("R 0");
+	EXPECT_EQ(ret, false);
+}
+
 TEST(SSDTestGroup, ValidReadCommandTest)
 {
 	SSD mySsd;
