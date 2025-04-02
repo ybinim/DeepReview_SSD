@@ -19,7 +19,13 @@ int main() {
 	while (true) {
 		std::cout << "Shell> ";
 		std::getline(std::cin, command);
-		shell->run(command);
+		int ret = shell->run(command);
+
+		if (ret == 1)
+		{
+			// exit command
+			return 0;
+		}
 	}
 }
 #endif
