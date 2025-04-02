@@ -65,7 +65,7 @@ TEST_F(TestShellTestFixture, WriteTest)
 	ASSERT_EQ(ret, 0);
 
 	ifstream file(nandTxt.c_str());
-	ASSERT_EQ(file.is_open(), true);
+	ASSERT_EQ(file.good(), true);
 	
 	string data = "";
 	getline(file, data);
@@ -85,4 +85,7 @@ TEST_F(TestShellTestFixture, WrongWriteTest)
 
 	ret = shell.run("write 100 0xAAAAAAAA");
 	EXPECT_EQ(ret, -2);
+
+	ifstream file(nandTxt.c_str());
+	EXPECT_EQ(file.good(), false);
 }

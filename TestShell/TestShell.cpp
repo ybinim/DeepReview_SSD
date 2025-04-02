@@ -4,6 +4,8 @@
 #include <vector>
 #include <iostream>
 
+#include "SSDWriter.cpp"
+
 using namespace std;
 
 class TestShell
@@ -11,6 +13,7 @@ class TestShell
 public:
 	int run(string command) {
         vector<string> param = parseCommand(command, ' ');
+        int result = 0;
 
         if (param[0].compare("exit") == 0) {
             return 1;
@@ -19,7 +22,10 @@ public:
 
         }
         else if (param[0].compare("write") == 0) {
-
+            if (param.size() != 3) {
+                result = -2;
+            }
+            result = writer.write(param[1], param[2]);
         }
         else if (param[0].compare("fullread") == 0) {
 
@@ -50,4 +56,6 @@ private:
 
         return result;
     }
+
+    SSDWriter writer;
 };
