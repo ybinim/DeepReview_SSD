@@ -1,4 +1,4 @@
-#include "TestShell.h"
+ï»¿#include "TestShell.h"
 #include <iomanip>
 
 using namespace std;
@@ -52,7 +52,7 @@ void TestShell::printHelp() {
     std::cout << "=====================================\n\n";
 
     // Author Information
-    std::cout << "Author  : DeepReviewer / À±ÀÌ³ª, ÀÌ¿ëÀç, ÀÓ¿ëºó, Àå¿µÁø\n\n";
+    std::cout << "Author  : DeepReviewer / ìœ¤ì´ë‚˜, ì´ìš©ìž¬, ìž„ìš©ë¹ˆ, ìž¥ì˜ì§„\n\n";
 
     // Usage
     std::cout << "Usage   : Command [arguments] [arguments]\n\n";
@@ -68,19 +68,19 @@ void TestShell::printHelp() {
     // Examples
     std::cout << "\nExamples:\n";
     std::cout << std::setw(30) << std::left << "  write 3 0xAAAABBBB"
-        << "  : 3¹ø LBA¿¡ 0xAAAABBBB¸¦ ±â·Ï\n";
+        << "  : 3ë²ˆ LBAì— 0xAAAABBBBë¥¼ ê¸°ë¡\n";
     std::cout << std::setw(30) << std::left << "  read 3"
-        << "  : 3¹ø LBA¸¦ ÀÐ´Â´Ù\n";
+        << "  : 3ë²ˆ LBAë¥¼ ì½ëŠ”ë‹¤\n";
     std::cout << std::setw(30) << std::left << "  fullwrite 0xABCDFFFF"
-        << "  : ÀüÃ¼ LBA¿¡ 0xABCDFFFF¸¦ ±â·Ï\n";
+        << "  : ì „ì²´ LBAì— 0xABCDFFFFë¥¼ ê¸°ë¡\n";
     std::cout << std::setw(30) << std::left << "  fullread"
-        << "  : ÀüÃ¼ LBAÀÇ °ªÀ» È­¸é¿¡ Ãâ·Â\n";
+        << "  : ì „ì²´ LBAì˜ ê°’ì„ í™”ë©´ì— ì¶œë ¥\n";
     std::cout << std::setw(30) << std::left << "  exit"
-        << "  : ÇÁ·Î±×·¥ Á¾·á\n";
+        << "  : í”„ë¡œê·¸ëž¨ ì¢…ë£Œ\n";
     // Notes
     std::cout << "\nNote:\n";
-    std::cout << "  [LBA]   : 0~99, 10Áø¼ö·Î ÀÔ·Â¹ÞÀ½\n";
-    std::cout << "  [Value] : 0x00000000~0xFFFFFFFF, 0x°¡ ºÙÀ¸¸ç 10 ±ÛÀÚ·Î Ç¥±â\n";
+    std::cout << "  [LBA]   : 0~99, 10ì§„ìˆ˜ë¡œ ìž…ë ¥ë°›ìŒ\n";
+    std::cout << "  [Value] : 0x00000000~0xFFFFFFFF, 0xê°€ ë¶™ìœ¼ë©° 10 ê¸€ìžë¡œ í‘œê¸°\n";
 
     // End of Help
     std::cout << "\n=====================================\n";
