@@ -2,9 +2,8 @@
 #include <string>
 #include <map>
 #include <fstream>
+
 #include "ssd.h"
-#include "SSD_Read.cpp"
-#include "write.h"
 
 using namespace testing;
 

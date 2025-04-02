@@ -56,14 +56,15 @@ SSD::run(string input)
 	}
 
 	// execute
+	int lba = stoi(lbaStr);
+
 	if (commandStr == "W")
 	{
-		int lba = stoi(lbaStr);
 		ret = myWrite.execute(ssdMap, lba, dataStr);
 	}
 	else if (commandStr == "R")
 	{
-
+		myRead.execute(ssdMap, lba);
 	}
 
 	return ret;
