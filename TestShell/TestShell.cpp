@@ -1,6 +1,4 @@
 ﻿#include "TestShell.h"
-#include <iomanip>
-#include <random>
 
 using namespace std;
 
@@ -90,19 +88,6 @@ int TestShell::fullWriteAndReadCompare() {
 
 int TestShell::partialLBAWrite() {
     return 0;
-}
-
-int TestShell::readCompare(string& expected) {
-    ifstream file;
-    file.open("ssd_output.txt");
-    if (file.is_open()) {
-        string actual = "";
-        getline(file, actual);
-        if (expected.compare(actual) == 0) {
-            return 0;
-        }
-    }
-    return -1;
 }
 
 int TestShell::writeReadAging() {

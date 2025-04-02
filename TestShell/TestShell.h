@@ -5,6 +5,8 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <iomanip>
+#include <random>
 
 #include "SSDRunner.h"
 
@@ -25,7 +27,6 @@ private:
     int partialLBAWrite();
     int writeReadAging();
     void printTestScriptResult(int result);
-    int readCompare(string& expected);
 
     SSDRunner* reader;
     SSDRunner* writer;
