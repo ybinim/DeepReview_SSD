@@ -24,3 +24,15 @@ TEST(TestShellTestGroup, TestShellParamTest)
 	ret = shell.run("exit");
 	EXPECT_EQ(ret, 1);
 }
+
+TEST(TestShellTestGroup, TestShellInvalidCommand)
+{
+	TestShell shell;
+	int ret;
+
+	ret = shell.run("move");
+	EXPECT_EQ(ret, -1);
+
+	ret = shell.run("copy");
+	EXPECT_EQ(ret, -1);
+}
