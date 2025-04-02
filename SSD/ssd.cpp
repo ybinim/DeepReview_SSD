@@ -22,11 +22,8 @@ SSD::run(string input)
 		return false;
 	}
 
-	int lba = stoi(lbaStr);
-
 	std::map<int, std::string> ssdMap;
 	ssdMap.clear();
-	ssdMap.insert({ lba , dataStr });
 
 	// ssd_nand.txt 파일 읽기
 	ifstream file;
@@ -61,6 +58,7 @@ SSD::run(string input)
 	// execute
 	if (commandStr == "W")
 	{
+		int lba = stoi(lbaStr);
 		ret = myWrite.execute(ssdMap, lba, dataStr);
 	}
 	else if (commandStr == "R")
