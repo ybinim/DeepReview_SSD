@@ -1,8 +1,10 @@
 #include "SSDWriter.h"
 
+#include <iostream>
+
 using namespace std;
 
-int SSDWriter::write(vector<string>& param) {
+int SSDWriter::execute(vector<string>& param) {
 	if (param.size() != 3) {
 		return -2;
 	}
@@ -10,7 +12,7 @@ int SSDWriter::write(vector<string>& param) {
 	string lba = param[1];
 	string data = param[2];
 
-	if (isNumber(lba) == false) {
+	if (lba.length() > 2 || isNumber(lba) == false) {
 		return -2;
 	}
 
@@ -22,21 +24,19 @@ int SSDWriter::write(vector<string>& param) {
 		return -2;
 	}
 
+	for (char& c : data.substr(2, string::npos)) {
+		if (c < 'A' || c > 'F') {
+			return -2;
+		}
+	}
+
 	string command = "ssd.exe W ";
 	command += lba;
 	command += " ";
 	command += data;
 
 	int ret = system(command.c_str());
-	return ret;
-}
 
-bool SSDWriter::isNumber(string& lba)
-{
-	for (char& c : lba) {
-		if (isdigit(c) == false) {
-			return false;
-		}
-	}
-	return true;
+	cout << "[Write] Done" << endl;
+	return ret;
 }
