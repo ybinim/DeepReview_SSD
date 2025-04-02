@@ -67,6 +67,24 @@ TEST_F(SSDFixture, SSDTest_InvalidCommand)
 	EXPECT_EQ(ret, false);
 }
 
+TEST_F(SSDFixture, SSDTest_InvalidLBAWriteCommand1)
+{
+	DeleteOutPutFile();
+
+	bool ret = mySsd.run("W 100 0xCAFECAFE");
+	EXPECT_EQ(ret, false);
+	ValidCheckOfOutputFile("ERROR");
+}
+
+TEST_F(SSDFixture, SSDTest_InvalidLBAWriteCommand2)
+{
+	DeleteOutPutFile();
+
+	bool ret = mySsd.run("W !!! 0xCAFECAFE");
+	EXPECT_EQ(ret, false);
+	ValidCheckOfOutputFile("ERROR");
+}
+
 TEST_F(SSDFixture, ReadInvalidAddrTest)
 {
 	std::map<int, std::string> invalidAddr = {
