@@ -60,9 +60,9 @@ public:
 		}
 
 		for (char& c : data.substr(2, string::npos)) {
-			if (c < 'A' || c > 'F') {
+			/*if (c < 'A' || c > 'F') {
 				return -2;
-			}
+			}*/
 		}
 
 		auto it = nandText.find(stoi(lba));
