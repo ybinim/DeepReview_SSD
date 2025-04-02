@@ -22,16 +22,22 @@ SSD::run(string input)
 		return false;
 	}
 
+	if (IsInvalidLBA(lbaStr))
+	{
+		std::ofstream outputFile(outputfilePath, std::ios::trunc);
+		outputFile << "ERROR";
+		return false;
+	}
+
 	std::map<int, std::string> ssdMap;
 	ssdMap.clear();
 
 	// ssd_nand.txt 파일 읽기
 	ifstream file;
-	string filename = "ssd_nand.txt";
 	string lineStr, keyStr, valueStr;
 	int key = 0xFFFF; // invalid key
 	
-	file.open(filename);
+	file.open(nandfilePath);
 	if (file.is_open())
 	{
 		// "ssd_nand.txt" 파일이 있는 경우 읽어서 map 구성
@@ -46,7 +52,7 @@ SSD::run(string input)
 	else
 	{
 		// "ssd_nand.txt" 파일이 없는 경우 file 생성
-		ofstream outFile(filename);
+		ofstream outFile(nandfilePath);
 
 		if (!outFile.is_open()) {
 			return false;
@@ -75,4 +81,27 @@ SSD::IsInvalidCommand(string command)
 {
 	return !((command == "W") || (command == "R"));
 
+}
+
+bool
+SSD::IsInvalidLBA(string lbaStr)
+{
+	int lba = 0;
+	bool ret = false;
+
+	try {
+		lba = std::stoi(lbaStr);
+
+		if (lba < 0 || lba >= 100) {
+			ret = true;
+		}
+	}
+	catch (const std::invalid_argument& e) {
+		ret = true;
+	}
+	catch (const std::out_of_range& e) {
+		ret = true;
+	}
+
+	return ret;
 }

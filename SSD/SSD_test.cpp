@@ -85,6 +85,22 @@ TEST_F(SSDFixture, SSDTest_InvalidLBAWriteCommand2)
 	ValidCheckOfOutputFile("ERROR");
 }
 
+TEST_F(SSDFixture, SSDTest_InvalidLBAReadCommand1)
+{
+	DeleteOutPutFile();
+
+	mySsd.run("R 999");
+	ValidCheckOfOutputFile("ERROR");
+}
+
+TEST_F(SSDFixture, SSDTest_InvalidLBAReadCommand2)
+{
+	DeleteOutPutFile();
+
+	mySsd.run("R !~@");
+	ValidCheckOfOutputFile("ERROR");
+}
+
 TEST_F(SSDFixture, ReadInvalidAddrTest)
 {
 	std::map<int, std::string> invalidAddr = {
