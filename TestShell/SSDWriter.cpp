@@ -28,7 +28,6 @@ int SSDWriter::write(vector<string>& param) {
 	command += data;
 
 	int ret = system(command.c_str());
-
 	return ret;
 }
 
