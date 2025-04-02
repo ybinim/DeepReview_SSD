@@ -3,7 +3,6 @@
 #include <string>
 #include <exception> 
 #include "ssd.h"
-#include "main.h"
 
 #ifdef _DEBUG
 int main() {
@@ -11,6 +10,7 @@ int main() {
     return RUN_ALL_TESTS();
 }
 #else
+void CombineParametersIntoASingleString(std::string& params, char* argv[], int argc);
 int main(int argc, char* argv[]) {
     if (argc == 3 || argc == 4) {
         std::string params = "";
@@ -18,7 +18,6 @@ int main(int argc, char* argv[]) {
  
         SSD mySsd;
         mySsd.run(params);
-        std::cout << params << std::endl;
     }
 
     return 0;
