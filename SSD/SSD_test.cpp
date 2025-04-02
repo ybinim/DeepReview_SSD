@@ -8,17 +8,24 @@
 
 using namespace testing;
 
-TEST(SSDTestGroup, ValidReadCommandTest)
+TEST(SSDTestGroup, txtFileNotExistTest)
 {
 	SSD mySsd;
 	bool ret = mySsd.run("R 0");
-	EXPECT_EQ(ret, true);
+	EXPECT_EQ(ret, false);
 }
 
 TEST(SSDTestGroup, ValidWriteCommandTest)
 {
 	SSD mySsd;
 	bool ret = mySsd.run("W 0 0x12345678");
+	EXPECT_EQ(ret, true);
+}
+
+TEST(SSDTestGroup, ValidReadCommandTest)
+{
+	SSD mySsd;
+	bool ret = mySsd.run("R 0");
 	EXPECT_EQ(ret, true);
 }
 
@@ -137,4 +144,3 @@ TEST(SSDTestGroup, WriteFileUpdateChangeMapValueTest)
 	std::getline(file, output);
 	EXPECT_EQ("2 0xDDDDDDDD", output);
 }
-
