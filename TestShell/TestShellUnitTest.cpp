@@ -1,5 +1,5 @@
 #include "gmock/gmock.h"
-#include "TestShell.cpp"
+#include "TestShell.h"
 
 #include <string>
 #include <fstream>

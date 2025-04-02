@@ -136,6 +136,10 @@
     <ClCompile Include="TestShell.cpp" />
     <ClCompile Include="TestShellUnitTest.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="SSDWriter.h" />
+    <ClInclude Include="TestShell.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\gmock.1.11.0\build\native\gmock.targets" Condition="Exists('..\packages\gmock.1.11.0\build\native\gmock.targets')" />
