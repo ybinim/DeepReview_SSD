@@ -2,7 +2,7 @@
 #include <string>
 
 #include "write.h"
-#include "SSD_Read.cpp"
+#include "read.h"
 
 class SSD {
 public:
