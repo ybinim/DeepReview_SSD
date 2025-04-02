@@ -14,6 +14,7 @@ int TestShell::run(string command) {
     }
     else if (param[0].compare("write") == 0) {
         result = writer->execute(param);
+        cout << "[Write] Done" << endl;
     }
     else if (param[0].compare("fullread") == 0) {
 
@@ -23,6 +24,7 @@ int TestShell::run(string command) {
             return -2;
         }
         result = runFullWrite(param);
+        cout << "[FullWrite] Done" << endl;
     }
     else if (param[0].compare("help") == 0) {
 
