@@ -19,6 +19,11 @@ private:
     vector<string> parseCommand(string& command, char delimiter);
     int runFullWrite(std::vector<std::string>& param);
     void printHelp(void);
+
+    int fullWriteAndReadCompare();
+    int partialLBAWrite();
+    int writeReadAging();
+    void printTestScriptResult(int result);
   
     SSDRunner* reader;
     SSDRunner* writer;

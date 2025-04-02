@@ -30,6 +30,18 @@ int TestShell::run(string command) {
     else if (param[0].compare("help") == 0) {
         printHelp();
     }
+    else if ((param[0].compare("1_FullWriteAndReadCompare") == 0) || (param[0].compare("1_") == 0)) {
+        result = fullWriteAndReadCompare();
+        printTestScriptResult(result);
+    }
+    else if ((param[0].compare("2_PartialLBAWrite") == 0) || (param[0].compare("2_") == 0)) {
+        result = partialLBAWrite();
+        printTestScriptResult(result);
+    }
+    else if ((param[0].compare("3_WriteReadAging") == 0) || (param[0].compare("3_") == 0)) {
+        result = writeReadAging();
+        printTestScriptResult(result);
+    }
     else {
         cout << "INVALID COMMAND" << endl;
         return -1;
@@ -112,4 +124,25 @@ void TestShell::printHelp() {
     std::cout << "\n=====================================\n";
     std::cout << "              End of Help\n";
     std::cout << "=====================================\n";
+}
+
+int TestShell::fullWriteAndReadCompare() {
+    return 0;
+}
+
+int TestShell::partialLBAWrite() {
+    return 0;
+}
+
+int TestShell::writeReadAging() {
+    return 0;
+}
+
+void TestShell::printTestScriptResult(int result) {
+    if (result == 0) {
+        cout << "PASS" << endl;
+    }
+    else {
+        cout << "FAIL" << endl;
+    }
 }
