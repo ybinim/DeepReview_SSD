@@ -175,12 +175,13 @@ TEST(SSDTestGroup, WriteFileUpdateChangeMapValueTest)
 {
 	WriteSSD myWrite;
 	std::map<int, std::string> nand = { };
-	std::string filePath = "ssd_nand.txt";
-	std::ifstream file(filePath.data());
-	std::string output = "";
 
 	myWrite.execute(nand, 2, "0xCCCCCCCC");
 	myWrite.execute(nand, 2, "0xDDDDDDDD");
+
+	std::string filePath = "ssd_nand.txt";
+	std::ifstream file(filePath.data());
+	std::string output = "";
 	std::getline(file, output);
 	EXPECT_EQ("2 0xDDDDDDDD", output);
 }
