@@ -5,17 +5,19 @@
 #include <vector>
 #include <iostream>
 
-#include "SSDWriter.h"
+#include "SSDRunner.h"
 
 using namespace std;
 
 class TestShell
 {
 public:
+    TestShell(SSDRunner* reader, SSDRunner* writer) : reader(reader), writer(writer) {}
     int run(string command);
 
 private:
     vector<string> parseCommand(string& command, char delimiter);
 
-    SSDWriter writer;
+    SSDRunner* reader;
+    SSDRunner* writer;
 };

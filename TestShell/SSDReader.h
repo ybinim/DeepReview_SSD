@@ -6,8 +6,11 @@
 
 using namespace std;
 
-class SSDWriter : public SSDRunner
+class SSDReader : public SSDRunner
 {
 public:
 	int execute(vector<string>& param) override;
+
+private:
+	const string outputFilePath = "ssd_output.txt";
 };
