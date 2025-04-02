@@ -244,3 +244,34 @@ TEST_F(TestShellTestFixture, FullReadTestAfterFullWrite)
 		EXPECT_EQ(it->second, "0xAAAAAAAA");
 	}
 }
+
+class MockTestShell : public TestShell {
+public:
+	MockTestShell(SSDRunner* reader, SSDRunner* writer) :
+		TestShell{ reader, writer } {
+	}
+	MOCK_METHOD(int, readCompare, (string& expected), (override));
+
+};
+
+TEST_F(TestShellTestFixture, 2_PartialLBAWriteTestWithReadComparePassCondition)
+{
+	MockTestShell mockShell(&reader, &writer);
+
+	EXPECT_CALL(mockShell, readCompare(_))
+		.WillRepeatedly(Return(0));
+
+	EXPECT_EQ(0, mockShell.run("2_"));
+
+}
+
+TEST_F(TestShellTestFixture, 2_PartialLBAWriteTestWithReadCompareFailCondition)
+{
+	MockTestShell mockShell(&reader, &writer);
+
+	EXPECT_CALL(mockShell, readCompare(_))
+		.WillRepeatedly(Return(-1));
+
+	EXPECT_EQ(-1, mockShell.run("2_"));
+
+}
