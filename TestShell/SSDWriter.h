@@ -2,13 +2,12 @@
 #include <string>
 #include <vector>
 
+#include "SSDRunner.h"
+
 using namespace std;
 
-class SSDWriter
+class SSDWriter : public SSDRunner
 {
 public:
-	int write(vector<string>& param);
-
-private:
-	bool isNumber(string& lba);
+	int execute(vector<string>& param) override;
 };

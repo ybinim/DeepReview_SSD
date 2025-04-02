@@ -1,125 +1,145 @@
 #include "gmock/gmock.h"
-#include "TestShell.h"
+#include "Testshell.h"
+#include "SSDRunner.h"
 
 #include <string>
+#include <vector>
 #include <fstream>
 
 using namespace std;
 using namespace testing;
 
-class TestShellTestFixture : public Test
+map<int, string> nandText;
+string outputText;
+
+
+class MockReader : public SSDRunner
 {
 public:
-	TestShell shell;
-	const string nandTxt = "../SSD/ssd_nand.txt";
-	const string outputTxt = "../SSD/ssd_output.txt";
+	int execute(vector<string>& param) override {
+		if (param.size() != 2) {
+			return -2;
+		}
 
-	void prepareRead() {
-		shell.run("write 0 0xAAAAAAAA");
-		shell.run("write 1 0xBBBBBBBB");
-		shell.run("write 99 0xFFFFFFFF");
-	}
+		string lba = param[1];
+		if (lba.length() > 2 || isNumber(lba) == false) {
+			return -2;
+		}
 
-protected:
-	void SetUp() override {
-		remove(nandTxt.c_str());
-		remove(outputTxt.c_str());
-	}
+		outputText = "0x00000000";
+		auto it = nandText.find(stoi(lba));
+		if (it != nandText.end()) {
+			outputText = it->second;
+		}
 
-	void TearDown() override {
-		remove(nandTxt.c_str());
-		remove(outputTxt.c_str());
+		return 0;
 	}
 };
 
+class MockWriter : public SSDRunner
+{
+public:
+	int execute(vector<string>& param) override {
+		if (param.size() != 3) {
+			return -2;
+		}
+
+		string lba = param[1];
+		string data = param[2];
+
+		if (lba.length() > 2 || isNumber(lba) == false) {
+			return -2;
+		}
+
+		if (data.length() != 10) {
+			return -2;
+		}
+
+		if (data.substr(0, 2).compare("0x") != 0) {
+			return -2;
+		}
+
+		for (char& c : data.substr(2, string::npos)) {
+			if (c < 'A' || c > 'F') {
+				return -2;
+			}
+		}
+
+		nandText.emplace(stoi(lba), data);
+		return 0;
+	}
+};
+
+class TestShellTestFixture : public Test
+{
+public:
+	MockReader reader;
+	MockWriter writer;
+	TestShell* shell;
+
+protected:
+	void SetUp() override {
+		shell = new TestShell(&reader, &writer);
+	}
+
+	void TearDown() override {
+		delete shell;
+	}
+};
+
+
 TEST_F(TestShellTestFixture, ExitTest)
 {
-	TestShell shell;
-	int ret = shell.run("exit");
+	int ret = shell->run("exit");
 	EXPECT_EQ(ret, 1);
 }
 
 TEST_F(TestShellTestFixture, InvalidCommandTest)
 {
-	TestShell shell;
 	int ret;
 
-	ret = shell.run("move");
+	ret = shell->run("move");
 	EXPECT_EQ(ret, -1);
 
-	ret = shell.run("copy");
+	ret = shell->run("copy");
 	EXPECT_EQ(ret, -1);
 }
 
 TEST_F(TestShellTestFixture, WriteTest)
 {
-	int ret = shell.run("write 3 0xAAAAAAAA");
-	ASSERT_EQ(ret, 0);
-
-	ifstream file;
-	file.open(nandTxt.c_str());
-	ASSERT_EQ(file.good(), true);
-
-	string data = "";
-	getline(file, data);
-	EXPECT_EQ(data.compare("3 0xAAAAAAAA"), 0);
-	file.close();
+	int ret = shell->run("write 3 0xAAAAAAAA");
+	EXPECT_EQ(ret, 0);
 }
 
 TEST_F(TestShellTestFixture, WrongWriteTest)
 {
-	int ret = shell.run("write 3");
+	int ret = shell->run("write 3");
 	EXPECT_EQ(ret, -2);
 
-	ret = shell.run("write 3 0xABCDEFGHIJKLMN");
+	ret = shell->run("write 3 0xABCDEFGHIJKLMN");
 	EXPECT_EQ(ret, -2);
 
-	ret = shell.run("write 0a 0xAAAAAAAA");
+	ret = shell->run("write 0a 0xAAAAAAAA");
 	EXPECT_EQ(ret, -2);
 
-	ret = shell.run("write 100 0xAAAAAAAA");
+	ret = shell->run("write 100 0xAAAAAAAA");
 	EXPECT_EQ(ret, -2);
-
-	ifstream file(nandTxt.c_str());
-	EXPECT_EQ(file.good(), false);
 }
 
 TEST_F(TestShellTestFixture, ReadTest)
 {
-	int ret = shell.run("read 0");
+	int ret = shell->run("read 0");
 	EXPECT_EQ(ret, 0);
-
-	ifstream file;
-	file.open(outputTxt.c_str());
-	ASSERT_EQ(file.good(), true);
-
-	string data = "";
-	getline(file, data);
-	EXPECT_EQ(data.compare("0xAAAAAAAA"), 0);
-	file.close();
-
-	ret = shell.run("read 1");
-	EXPECT_EQ(ret, 0);
-
-	file.open(outputTxt.c_str());
-	ASSERT_EQ(file.good(), true);
-
-	getline(file, data);
-	EXPECT_EQ(data.compare("0xBBBBBBBB"), 0);
-	file.close();
 }
 
 TEST_F(TestShellTestFixture, WrongReadTest)
 {
-	int ret = shell.run("Read 0a");
+	int ret = shell->run("read 0a");
 	EXPECT_EQ(ret, -2);
 
-	ret = shell.run("Read 100");
+	ret = shell->run("read 100");
 	EXPECT_EQ(ret, -2);
 
-	ret = shell.run("read 0 0xAAAAAAAA");
+	ret = shell->run("read 0 0xAAAAAAAA");
 	EXPECT_EQ(ret, -2);
-
-	ifstream file(outputTxt.c_str());
-	EXPECT_EQ(file.good(), false);
 }

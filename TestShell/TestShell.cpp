@@ -10,10 +10,10 @@ int TestShell::run(string command) {
         return 1;
     }
     else if (param[0].compare("read") == 0) {
-
+        result = reader->execute(param);
     }
     else if (param[0].compare("write") == 0) {
-        result = writer.write(param);
+        result = writer->execute(param);
     }
     else if (param[0].compare("fullread") == 0) {
 
@@ -29,7 +29,7 @@ int TestShell::run(string command) {
         return -1;
     }
 
-    return 0;
+    return result;
 }
 
 vector<string> TestShell::parseCommand(string& command, char delimiter) {

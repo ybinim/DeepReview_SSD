@@ -132,11 +132,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="SSDReader.cpp" />
     <ClCompile Include="SSDWriter.cpp" />
     <ClCompile Include="TestShell.cpp" />
     <ClCompile Include="TestShellUnitTest.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="SSDReader.h" />
+    <ClInclude Include="SSDRunner.h" />
     <ClInclude Include="SSDWriter.h" />
     <ClInclude Include="TestShell.h" />
   </ItemGroup>
