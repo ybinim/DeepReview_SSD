@@ -1,13 +1,9 @@
 #pragma once
 #include <string>
 
-#include "SSD_Read.cpp"
 #include "write.h"
+#include "SSD_Read.cpp"
 
-enum command {
-	Write = 0,
-	Read = 1,
-};
 class SSD {
 public:
 	bool run(std::string input);
