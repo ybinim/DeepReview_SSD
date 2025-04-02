@@ -190,6 +190,11 @@ TEST_F(TestShellTestFixture, WrongReadTest)
 	EXPECT_EQ(ret, -2);
 }
 
+TEST_F(TestShellTestFixture, HelpCommandTest) {
+	int ret = shell->run("help");
+	EXPECT_EQ(ret, 0);
+}
+
 TEST_F(TestShellTestFixture, FullWriteTest)
 {
 	int ret = shell->run("fullwrite 0xFFFFFFFF");
