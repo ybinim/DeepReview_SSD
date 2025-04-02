@@ -202,3 +202,15 @@ TEST_F(TestShellTestFixture, FullWriteTest)
 		EXPECT_EQ(it->second, "0xFFFFFFFF");
 	}
 }
+
+TEST_F(TestShellTestFixture, InvalidFullWriteTest)
+{
+	int ret = shell->run("fullwrite");
+	EXPECT_EQ(ret, -2);
+
+	ret = shell->run("fullwrite AAAAAAAAAA");
+	EXPECT_EQ(ret, -2);
+
+	ret = shell->run("fullwrite 12345678");
+	EXPECT_EQ(ret, -2);
+}
