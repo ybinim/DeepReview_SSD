@@ -13,10 +13,7 @@ int TestShell::run(string command) {
 
     }
     else if (param[0].compare("write") == 0) {
-        if (param.size() != 3) {
-            result = -2;
-        }
-        result = writer.write(param[1], param[2]);
+        result = writer.write(param);
     }
     else if (param[0].compare("fullread") == 0) {
 

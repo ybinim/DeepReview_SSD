@@ -2,7 +2,14 @@
 
 using namespace std;
 
-int SSDWriter::write(string lba, string data) {
+int SSDWriter::write(vector<string>& param) {
+	if (param.size() != 3) {
+		return -2;
+	}
+
+	string lba = param[1];
+	string data = param[2];
+
 	if (isNumber(lba) == false) {
 		return -2;
 	}
