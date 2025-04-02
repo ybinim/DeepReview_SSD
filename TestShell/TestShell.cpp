@@ -1,5 +1,6 @@
 ﻿#include "TestShell.h"
 #include <iomanip>
+#include <fstream>
 
 using namespace std;
 
@@ -131,11 +132,60 @@ int TestShell::fullWriteAndReadCompare() {
 }
 
 int TestShell::partialLBAWrite() {
-    return 0;
+    string data = "0x11223344";
+    vector<string> lbaList = { "4", "0", "3", "1", "2"};
+    vector<string> writeParam;
+    vector<string> readParam;
+    int result = 0;
+
+    for (int count = 0; count < 30; count++) {
+        for (const string& lba : lbaList) {
+            writeParam.push_back("write");
+            writeParam.push_back(lba);
+            writeParam.push_back(data);
+
+            result = writer->execute(writeParam);
+            if (result != 0) {
+                break;
+            }
+            writeParam.clear();
+        }
+
+        for (const string& lba : lbaList) {
+            readParam.push_back("read");
+            readParam.push_back(lba);
+
+            result = reader->execute(readParam);
+            if (result != 0) {
+                break;
+            }
+            
+            result = readCompare(data);
+            if (result != 0) {
+                break;
+            }
+            readParam.clear();
+        }
+    }
+
+    return result;
 }
 
 int TestShell::writeReadAging() {
     return 0;
+}
+
+int TestShell::readCompare(string& expected) {
+    ifstream file;
+    file.open("ssd_output.txt");
+    if (file.is_open()) {
+        string actual = "";
+        getline(file, actual);
+        if (expected.compare(actual) == 0) {
+            return 0;
+        }
+    }
+    return -1;
 }
 
 void TestShell::printTestScriptResult(int result) {

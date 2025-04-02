@@ -23,6 +23,7 @@ private:
     int fullWriteAndReadCompare();
     int partialLBAWrite();
     int writeReadAging();
+    int readCompare(string& expected);
     void printTestScriptResult(int result);
   
     SSDRunner* reader;
