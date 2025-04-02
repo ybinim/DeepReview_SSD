@@ -3,6 +3,7 @@
 #include <string>
 #include <exception> 
 #include "ssd.h"
+#include "main.h"
 
 #ifdef _DEBUG
 int main() {
@@ -10,31 +11,29 @@ int main() {
     return RUN_ALL_TESTS();
 }
 #else
-bool isInvalidCommand(std::string command);
-
 int main(int argc, char* argv[]) {
-    int addr = -1;
     if (argc == 3 || argc == 4) {
         std::string params = "";
-        params.append(argv[1]);
-        params += " ";
-        params.append(argv[2]);
-
-        if (argc == 4) {
-            params += " ";
-            params.append(argv[3]);
-        }
-
+        CombineParametersIntoASingleString(params, argv, argc);
+ 
         SSD mySsd;
-        bool ret = mySsd.run(params);
+        mySsd.run(params);
+        std::cout << params << std::endl;
     }
 
     return 0;
 }
 
-bool isInvalidCommand(std::string command)
+void CombineParametersIntoASingleString(std::string& outParams, char* argv[], int argc)
 {
-    return !((command == "W") || (command == "R") || (command == "w") || (command == "r"));
-}
+    outParams.append(argv[1]);
+    outParams += " ";
+    outParams.append(argv[2]);
 
+    if (argc == 4) {
+        outParams += " ";
+        outParams.append(argv[3]);
+    }
+    return;
+}
 #endif
