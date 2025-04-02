@@ -9,6 +9,7 @@ public:
 	bool run(std::string input);
 	bool IsInvalidCommand(std::string command);
 	bool IsInvalidLBA(std::string command);
+	void ReadFileAndUpdateMap(std::map<int, std::string>& map);
 
 private:
 	WriteSSD myWrite;

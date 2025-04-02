@@ -29,38 +29,11 @@ SSD::run(string input)
 		return false;
 	}
 
+	// update map
 	std::map<int, std::string> ssdMap;
 	ssdMap.clear();
-
-	// ssd_nand.txt 파일 읽기
-	ifstream file;
-	string lineStr, keyStr, valueStr;
-	int key = 0xFFFF; // invalid key
+	ReadFileAndUpdateMap(ssdMap);
 	
-	file.open(nandfilePath);
-	if (file.is_open())
-	{
-		// "ssd_nand.txt" 파일이 있는 경우 읽어서 map 구성
-		while (getline(file, lineStr)) {
-			stringstream mapStream(lineStr);
-			mapStream >> keyStr >> valueStr;
-			key = stoi(keyStr);
-			ssdMap.insert({ key , valueStr });
-		}
-		file.close();
-	}
-	else
-	{
-		// "ssd_nand.txt" 파일이 없는 경우 file 생성
-		ofstream outFile(nandfilePath);
-
-		if (!outFile.is_open()) {
-			return false;
-		}
-
-		outFile.close();
-	}
-
 	// execute
 	int lba = stoi(lbaStr);
 
@@ -104,4 +77,26 @@ SSD::IsInvalidLBA(string lbaStr)
 	}
 
 	return ret;
+}
+
+void 
+SSD::ReadFileAndUpdateMap(std::map<int, std::string>& map)
+{
+	// ssd_nand.txt 파일 읽기
+	ifstream file;
+	string lineStr, keyStr, valueStr;
+	int key = 0xFFFF; // invalid key
+
+	file.open(nandfilePath);
+	if (file.is_open())
+	{
+		// "ssd_nand.txt" 파일이 있는 경우 읽어서 map 구성
+		while (getline(file, lineStr)) {
+			stringstream mapStream(lineStr);
+			mapStream >> keyStr >> valueStr;
+			key = stoi(keyStr);
+			map.insert({ key , valueStr });
+		}
+		file.close();
+	}
 }
