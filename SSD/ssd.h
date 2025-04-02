@@ -2,7 +2,7 @@
 #include <string>
 
 #include "SSD_Read.cpp"
-#include "write.cpp"
+#include "write.h"
 
 enum command {
 	Write = 0,
