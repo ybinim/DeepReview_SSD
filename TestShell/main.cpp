@@ -2,6 +2,7 @@
 #include "TestShell.h"
 #include "SSDReader.h"
 #include "SSDWriter.h"
+#include "SSDEraser.h"
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -18,7 +19,8 @@ int main(int argc, char* argv[]) {
 
 	SSDReader reader;
 	SSDWriter writer;
-	TestShell* shell = new TestShell(&reader, &writer);
+	SSDEraser eraser;
+	TestShell* shell = new TestShell(&reader, &writer, &eraser);
 
 	if (argc == 1) {
 		while (true) {
