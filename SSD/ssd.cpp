@@ -43,7 +43,11 @@ SSD::run(string input)
 	}
 	else if (commandStr == "R")
 	{
-		myRead.execute(ssdMap, lba);
+		ret = myRead.execute(ssdMap, lba);
+	}
+	else if (commandStr == "E")
+	{
+		ret = myErase.execute(ssdMap, lba, dataStr);
 	}
 
 	return ret;
@@ -52,7 +56,7 @@ SSD::run(string input)
 bool
 SSD::IsInvalidCommand(string command)
 {
-	return !((command == "W") || (command == "R"));
+	return !((command == "W") || (command == "R") || (command == "E"));
 
 }
 

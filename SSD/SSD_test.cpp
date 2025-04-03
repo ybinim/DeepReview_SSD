@@ -186,39 +186,39 @@ TEST_F(SSDFixture, WriteFileUpdateChangeMapValueTest)
 	EXPECT_EQ("2 0xDDDDDDDD", output);
 }
 
-TEST_F(SSDFixture, SSDTest_EraseValidSizeTest)
+TEST_F(SSDFixture, EraseTest_ValidSize)
 {
 	bool ret = mySsd.run("E 0 10");
 	EXPECT_EQ(ret, true);
 }
 
-TEST_F(SSDFixture, SSDTest_EraseInValidSizeTest)
-{
-	bool ret = mySsd.run("E 0 -1");
-	EXPECT_EQ(ret, true);
-}
-
-TEST_F(SSDFixture, SSDTest_EraseValidSizeTest)
+TEST_F(SSDFixture, EraseTest_ValidSize2)
 {
 	// Size 0은 에러는 아니다. 아무런 동작을 하지 않는다.
 	bool ret = mySsd.run("E 0 0");
 	EXPECT_EQ(ret, true);
 }
 
-TEST_F(SSDFixture, SSDTest_EraseInValidSizeTest2)
+TEST_F(SSDFixture, EraseTest_InValidSize)
 {
-	bool ret = mySsd.run("E 0 11");
-	EXPECT_EQ(ret, true);
-}
-
-TEST_F(SSDFixture, SSDTest_EraseValidSizeButOutOfRange)
-{
-	// 99까지만 처리함.
-	bool ret = mySsd.run("E 95 10");
+	bool ret = mySsd.run("E 0 -1");
 	EXPECT_EQ(ret, false);
 }
 
-TEST_F(SSDFixture, SSDTest_EraseInValidLBA)
+TEST_F(SSDFixture, EraseTest_InValidSize2)
+{
+	bool ret = mySsd.run("E 0 11");
+	EXPECT_EQ(ret, false);
+}
+
+TEST_F(SSDFixture, EraseTest_ValidSizeButOutOfRange)
+{
+	// 99까지만 처리함.
+	bool ret = mySsd.run("E 95 10");
+	EXPECT_EQ(ret, true);
+}
+
+TEST_F(SSDFixture, EraseTest_InValidLBA)
 {
 	bool ret = mySsd.run("E 100 10");
 	EXPECT_EQ(ret, false);
