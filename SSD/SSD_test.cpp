@@ -223,3 +223,37 @@ TEST_F(SSDFixture, EraseTest_InValidLBA)
 	bool ret = mySsd.run("E 100 10");
 	EXPECT_EQ(ret, false);
 }
+
+TEST_F(SSDFixture, EraseTest_WriteAndErase)
+{
+	mySsd.run("W 0 0x12345678");
+	mySsd.run("W 1 0xCCCCCCCC");
+	mySsd.run("W 2 0x1234ABCD");
+	mySsd.run("W 3 0xCCCCCCCC");
+	mySsd.run("W 4 0x00000000");
+	mySsd.run("W 5 0x5555AAAA");
+	mySsd.run("W 6 0xCCCCCCCC");
+
+	bool ret = mySsd.run("E 4 10");
+	EXPECT_EQ(ret, true);
+}
+
+TEST_F(SSDFixture, EraseTest_WriteAndEraseWithSizeZero)
+{
+	mySsd.run("W 97 0x12345678");
+	mySsd.run("W 98 0xCCCCCCCC");
+	mySsd.run("W 99 0x1234ABCD");
+
+	bool ret = mySsd.run("E 1 0");
+	EXPECT_EQ(ret, true);
+}
+
+TEST_F(SSDFixture, EraseTest_WriteAndEraseWithSize1)
+{
+	mySsd.run("W 97 0x12345670");
+	mySsd.run("W 98 0xCCCCCCC0");
+	mySsd.run("W 99 0x1234ABC0");
+
+	bool ret = mySsd.run("E 1 1");
+	EXPECT_EQ(ret, true);
+}

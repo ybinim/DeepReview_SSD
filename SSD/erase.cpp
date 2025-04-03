@@ -16,13 +16,13 @@ bool EraseSSD::execute(std::map<int, std::string>& nand, int lba, const std::str
 			if (lba + i >= 100) break;
 			auto ret = nand.find(lba+i);
 			if (ret != nand.end()) {
-				nand.erase(lba);
+				nand.erase(lba+i);
 			}
 		}
 
 		if (!updateSSDNandFile(nand)) {
 			return false;
-}
+		}
 	}
 
 	return true;
@@ -60,6 +60,7 @@ bool EraseSSD::updateSSDNandFile(std::map<int, std::string>& nand) {
 	}
 
 	for (const auto& pair : nand) {
+		std::cout << "key : " << pair.first << ", value : " << pair.second << std::endl;
 		outFile << pair.first << " " << pair.second << std::endl;
 	}
 
