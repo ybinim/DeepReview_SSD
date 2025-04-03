@@ -202,24 +202,24 @@ int TestShell::partialLBAWrite() {
 
 int TestShell::writeReadAging() {
     int result = 0;
+    int idx = 0;
     vector<string> lbaList = { "0", "99" };
     vector<string> testParam = {};
+    vector<string> dataValue = {};
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<unsigned int> dis(0x0, 0xFFFFFFFF);
     unsigned int randValue;
 
     for (int count = 0; count < 200; count++) {
-        std::stringstream ss;
-        vector<string> dataValue;
-        int idx = 0;
-
+        idx = 0;
         for (const string& lba : lbaList) {
+            std::stringstream ss;
             randValue = dis(gen);
             ss << "0x" << std::setw(8) << std::setfill('0') << std::hex << std::uppercase << randValue;
             //std::cout << "Random Value : " << ss.str() << "\n";
 
-            dataValue[idx] = ss.str();
+            dataValue.push_back(ss.str());
             testParam.push_back("write");
             testParam.push_back(lba);
             testParam.push_back(dataValue[idx++]);
