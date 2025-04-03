@@ -203,12 +203,14 @@ TEST_F(SSDFixture, EraseTest_InValidSize)
 {
 	bool ret = mySsd.run("E 0 -1");
 	EXPECT_EQ(ret, false);
+	validCheckOfOutputFile("ERROR");
 }
 
 TEST_F(SSDFixture, EraseTest_InValidSize2)
 {
 	bool ret = mySsd.run("E 0 11");
 	EXPECT_EQ(ret, false);
+	validCheckOfOutputFile("ERROR");
 }
 
 TEST_F(SSDFixture, EraseTest_ValidSizeButOutOfRange)
@@ -222,6 +224,7 @@ TEST_F(SSDFixture, EraseTest_InValidLBA)
 {
 	bool ret = mySsd.run("E 100 10");
 	EXPECT_EQ(ret, false);
+	validCheckOfOutputFile("ERROR");
 }
 
 TEST_F(SSDFixture, EraseTest_WriteAndErase)
