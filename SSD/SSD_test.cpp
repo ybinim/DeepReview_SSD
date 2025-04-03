@@ -185,3 +185,39 @@ TEST_F(SSDFixture, WriteFileUpdateChangeMapValueTest)
 	std::getline(file, output);
 	EXPECT_EQ("2 0xDDDDDDDD", output);
 }
+
+TEST_F(SSDFixture, SSDTest_EraseValidSizeCommand)
+{
+	bool ret = mySsd.run("E 0 10");
+	EXPECT_EQ(ret, true);
+}
+
+TEST_F(SSDFixture, SSDTest_EraseInValidSizeCommand)
+{
+	bool ret = mySsd.run("E 0 -1");
+	EXPECT_EQ(ret, true);
+}
+
+TEST_F(SSDFixture, SSDTest_EraseInValidSizeCommand)
+{
+	bool ret = mySsd.run("E 0 0");
+	EXPECT_EQ(ret, true);
+}
+
+TEST_F(SSDFixture, SSDTest_EraseInValidSizeCommand)
+{
+	bool ret = mySsd.run("E 0 11");
+	EXPECT_EQ(ret, true);
+}
+
+TEST_F(SSDFixture, SSDTest_EraseValidSizeButOutOfRange)
+{
+	bool ret = mySsd.run("D 95 10");
+	EXPECT_EQ(ret, false);
+}
+
+TEST_F(SSDFixture, SSDTest_EraseInValidLBA)
+{
+	bool ret = mySsd.run("D 100 10");
+	EXPECT_EQ(ret, false);
+}
