@@ -124,14 +124,12 @@ void SSD::loadCommandBuffer(vector<bufferElement>& commandBuffer) {
 		string fileName = file.path().filename().string();
 
 		if (fileName.substr(1).compare("_empty") == 0) {
-			cout << "empty file exists: " << fileName << endl;
 			continue;
 		}
 
 		stringstream commandStream(fileName);
 		string command, lba, param;
 		commandStream >> command >> lba >> param;
-		cout << "push to commandBuffer: " << command << lba << param << endl;
 		commandBuffer.push_back({ command, stoi(lba), param });
 	}
 }
@@ -155,11 +153,9 @@ bool SSD::flushCommandBuffer(vector<bufferElement>& commandBuffer) {
 
 	for (const bufferElement& element : commandBuffer) {
 		if (element.command == "W") {
-			cout << "flush W" << endl;
 			ret = myWrite.execute(ssdMap, element.lba, element.param);
 		}
 		else if (element.command == "E") {
-			cout << "flush E" << endl;
 			ret = myErase.execute(ssdMap, element.lba, element.param);
 		}
 		else {
@@ -185,7 +181,6 @@ bool SSD::searchInCommandBuffer(vector<bufferElement>& commandBuffer, int lba) {
 	for (const bufferElement& element : commandBuffer) {
 		if (element.command == "W") {
 			if (element.lba == lba) {
-				cout << "found in W!" << endl;
 				ofstream outputFile(outputfilePath, ios::trunc);
 				outputFile << element.param;
 				outputFile.close();
@@ -195,7 +190,6 @@ bool SSD::searchInCommandBuffer(vector<bufferElement>& commandBuffer, int lba) {
 		else if (element.command == "E") {
 			int size = stoi(element.param);
 			if ((lba >= element.lba) && (lba < element.lba + size)) {
-				cout << "found in E!" << endl;
 				ofstream outputFile(outputfilePath, ios::trunc);
 				outputFile << "0x00000000";
 				outputFile.close();
