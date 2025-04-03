@@ -4,7 +4,7 @@
 
 using namespace std;
 
-class SSDRunner
+class SSDExecutor
 {
 public:
 	virtual int execute(vector<string>& param) = 0;
