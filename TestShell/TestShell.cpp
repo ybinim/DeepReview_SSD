@@ -131,8 +131,11 @@ void TestShell::printHelp() {
     std::cout << "Commands :\n";
     std::cout << "  write [LBA] [DATA]\n";
     std::cout << "  read [LBA]\n";
-    std::cout << "  fullwrite [Value]\n";
+    std::cout << "  fullwrite [DATA]\n";
     std::cout << "  fullread\n";
+    std::cout << "  erase [LBA] [SIZE]\n";
+    std::cout << "  erase_range [Start LBA] [End LBA]\n";
+    std::cout << "  flush\n";
     std::cout << "  exit\n";
 
     // Examples
