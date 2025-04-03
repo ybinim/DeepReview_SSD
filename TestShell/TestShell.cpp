@@ -106,7 +106,7 @@ int TestShell::writeReadAging() {
 
         for (const string& lba : lbaList) {
             randValue = dis(gen);
-            ss << "0x" << std::hex << std::uppercase << randValue;
+            ss << "0x" << std::setw(8) << std::setfill('0') << std::hex << std::uppercase << randValue;
             //std::cout << "Random Value : " << ss.str() << "\n";
 
             dataValue[idx] = ss.str();
