@@ -1,20 +1,10 @@
-﻿#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <map>
-
-#include "ssd.h"
-#include "logger.cpp"
+﻿#include "ssd.h"
 using namespace std;
 
 bool 
 SSD::run(string input)
 {
 	bool ret = true;
-
-	Logger logger;
-	logger.print(__FUNCTION__, "Hello");
-
 	stringstream inputStream(input);
 	// 스트림을 통해, 문자열을 공백 분리해 변수에 할당
 	string commandStr, lbaStr, dataStr;
@@ -22,6 +12,7 @@ SSD::run(string input)
 
 	if (IsInvalidCommand(commandStr))
 	{
+		LOG_PRINT("Fail - Invalid Command ("+ commandStr +")");
 		return false;
 	}
 
@@ -46,7 +37,7 @@ SSD::run(string input)
 	}
 	else if (commandStr == "R")
 	{
-		myRead.execute(ssdMap, lba);
+		ret = myRead.execute(ssdMap, lba);
 	}
 
 	return ret;
@@ -70,6 +61,7 @@ SSD::IsInvalidLBA(string lbaStr)
 
 		if (lba < 0 || lba >= 100) {
 			ret = true;
+			LOG_PRINT("Fail - Invalid Command (" + lbaStr + ")");
 		}
 	}
 	catch (const std::invalid_argument& e) {

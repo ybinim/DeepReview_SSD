@@ -5,6 +5,7 @@
 #include <fstream>
 #include <map>
 #include <string>
+#include "logger.h"
 
 #define PATH_SSD_NAND_FILE  "ssd_nand.txt"
 

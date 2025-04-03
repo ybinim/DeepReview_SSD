@@ -20,6 +20,7 @@ bool WriteSSD::updateSSDNandFile(std::map<int, std::string>& nand) {
 	std::ofstream outFile(PATH_SSD_NAND_FILE);
 
 	if (!outFile.is_open()) {
+		LOG_PRINT("Fail - File is not opened");
 		return false;
 	}
 

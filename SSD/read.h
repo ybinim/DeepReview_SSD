@@ -6,6 +6,8 @@
 #include <map>
 #include <string>
 
+#include "logger.h"
+
 class ReadSSD {
 public:
     bool execute(const std::map<int, std::string>& nand, int lba);

@@ -144,6 +144,7 @@
     <ClCompile Include="write.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="logger.h" />
     <ClInclude Include="read.h" />
     <ClInclude Include="ssd.h" />
     <ClInclude Include="write.h" />

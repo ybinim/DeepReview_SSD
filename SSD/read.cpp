@@ -3,6 +3,7 @@
 bool ReadSSD::execute(const std::map<int, std::string>& nand, int lba) {
 	std::ofstream outputFile(filePath, std::ios::trunc);
 	if (!outputFile.is_open()) {
+		LOG_PRINT("Fail - File is not opened");
 		return false;
 	}
 

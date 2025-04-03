@@ -1,8 +1,13 @@
 #pragma once
 #include <string>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <map>
 
 #include "write.h"
 #include "read.h"
+#include "logger.h"
 
 class SSD {
 public:
