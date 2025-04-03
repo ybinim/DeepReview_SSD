@@ -30,6 +30,9 @@ int TestShell::run(string command) {
     else if ((param[0].compare("erase") == 0) || (param[0].compare("erase_range") == 0)) {
         result = eraser->execute(param);
     }
+    else if (param[0].compare("flush") == 0) {
+        result = flusher->execute(param);
+    }
     else if (param[0].compare("help") == 0) {
         printHelp();
     }
@@ -131,8 +134,11 @@ void TestShell::printHelp() {
     std::cout << "Commands :\n";
     std::cout << "  write [LBA] [DATA]\n";
     std::cout << "  read [LBA]\n";
-    std::cout << "  fullwrite [Value]\n";
+    std::cout << "  fullwrite [DATA]\n";
     std::cout << "  fullread\n";
+    std::cout << "  erase [LBA] [SIZE]\n";
+    std::cout << "  erase_range [Start LBA] [End LBA]\n";
+    std::cout << "  flush\n";
     std::cout << "  exit\n";
 
     // Examples

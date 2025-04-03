@@ -127,17 +127,30 @@ public:
 	}
 };
 
+class MockFlusher : public SSDExecutor
+{
+public:
+	int execute(vector<string>& param, bool print2Console = true) override {
+		if(param.size() != 1) {
+			return -2;
+		}
+
+		return 0;
+	}
+};
+
 class TestShellTestFixture : public Test
 {
 public:
 	MockReader reader;
 	MockWriter writer;
 	MockEraser eraser;
+	MockFlusher flusher;
 	TestShell* shell;
 
 protected:
 	void SetUp() override {
-		shell = new TestShell(&reader, &writer, &eraser);
+		shell = new TestShell(&reader, &writer, &eraser, &flusher);
 		nandText.clear();
 		outputText = "";
 	}
@@ -444,8 +457,8 @@ TEST_F(TestShellTestFixture, EraseRangeTest)
 
 class MockTestShell : public TestShell {
 public:
-	MockTestShell(SSDExecutor* reader, SSDExecutor* writer ,SSDExecutor* eraser) :
-		TestShell{ reader, writer, eraser } {
+	MockTestShell(SSDExecutor* reader, SSDExecutor* writer, SSDExecutor* eraser, SSDExecutor* flusher) :
+		TestShell{ reader, writer, eraser, flusher } {
 	}
 	MOCK_METHOD(int, readCompare, (string& expected), (override));
 
@@ -453,7 +466,7 @@ public:
 
 TEST_F(TestShellTestFixture, 2_PartialLBAWriteTestWithReadComparePassCondition)
 {
-	MockTestShell mockShell(&reader, &writer, &eraser);
+	MockTestShell mockShell(&reader, &writer, &eraser, &flusher);
 
 	EXPECT_CALL(mockShell, readCompare(_))
 		.Times(150)
@@ -465,7 +478,7 @@ TEST_F(TestShellTestFixture, 2_PartialLBAWriteTestWithReadComparePassCondition)
 
 TEST_F(TestShellTestFixture, 2_PartialLBAWriteTestWithReadCompareFailCondition)
 {
-	MockTestShell mockShell(&reader, &writer, &eraser);
+	MockTestShell mockShell(&reader, &writer, &eraser, &flusher);
 
 	EXPECT_CALL(mockShell, readCompare(_))
 		.Times(1)
