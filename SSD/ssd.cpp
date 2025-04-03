@@ -19,29 +19,28 @@ bool SSD::run(string input) {
 
 	if (isInvalidCommand(commandStr))
 	{
+		cout << "invalid" << endl;
 		return false;
 	}
 
 	if ((commandStr != "F") && isInvalidLBA(lbaStr))
 	{
+		cout << "invalidinvalid" << endl;
 		ofstream outputFile(outputfilePath, ios::trunc);
 		outputFile << "ERROR";
 		return false;
 	}
-	else {
-		lba = stoi(lbaStr);
-	}
 
 	// load command buffer
-	vector<bufferElement> commandBuffer = {};
-	loadCommandBuffer(commandBuffer);
+	loadCommandBuffer();
 
 	if (commandStr == "F") {
-		ret = flushCommandBuffer(commandBuffer);
+		ret = flushCommandBuffer();
 	}
 	else if (commandStr == "R")
 	{
-		ret = searchInCommandBuffer(commandBuffer, lba);
+		lba = stoi(lbaStr);
+		ret = searchInCommandBuffer(lba);
 		if (ret == true) {
 			return ret;
 		}
@@ -56,13 +55,14 @@ bool SSD::run(string input) {
 	}
 	else if ((commandStr == "W") || (commandStr == "E"))
 	{
+		lba = stoi(lbaStr);
 		if (commandBuffer.size() == 5) {
-			ret = flushCommandBuffer(commandBuffer);
+			ret = flushCommandBuffer();
 			if (ret == false) {
 				return ret;
 			}
 		}
-		ret = writeToCommandBuffer(commandBuffer.size() + 1, commandStr, lba, dataStr);
+		ret = writeToCommandBuffer(commandStr, lba, dataStr);
 	}
 
 	return ret;
@@ -114,7 +114,7 @@ void SSD::readFileAndUpdateMap(map<int, string>& map) {
 	}
 }
 
-void SSD::loadCommandBuffer(vector<bufferElement>& commandBuffer) {
+void SSD::loadCommandBuffer() {
 	if (filesystem::exists(bufferDirPath) == false) {
 		createEmptyCommandBuffer();
 		return;
@@ -124,12 +124,15 @@ void SSD::loadCommandBuffer(vector<bufferElement>& commandBuffer) {
 		string fileName = file.path().filename().string();
 
 		if (fileName.substr(1).compare("_empty") == 0) {
+			cout << "empty file exists: " << fileName << endl;
 			continue;
 		}
 
 		stringstream commandStream(fileName);
 		string command, lba, param;
 		commandStream >> command >> lba >> param;
+
+		cout << "push back to commandBuffer - " << command << lba << param << endl;
 		commandBuffer.push_back({ command, stoi(lba), param });
 	}
 }
@@ -140,10 +143,11 @@ void SSD::createEmptyCommandBuffer() {
 	for (int i = 1; i <= 5; i++) {
 		empty.open(bufferDirPath + "/" + to_string(i) + "_empty");
 		empty.close();
+		cout << "create " << i << " done" << endl;
 	}
 }
 
-bool SSD::flushCommandBuffer(vector<bufferElement>& commandBuffer) {
+bool SSD::flushCommandBuffer() {
 	bool ret = true;
 
 	// update map
@@ -153,9 +157,11 @@ bool SSD::flushCommandBuffer(vector<bufferElement>& commandBuffer) {
 
 	for (const bufferElement& element : commandBuffer) {
 		if (element.command == "W") {
+			cout << "flush W " << element.lba << element.param << endl;
 			ret = myWrite.execute(ssdMap, element.lba, element.param);
 		}
 		else if (element.command == "E") {
+			cout << "flush E " << element.lba << element.param << endl;
 			ret = myErase.execute(ssdMap, element.lba, element.param);
 		}
 		else {
@@ -177,10 +183,11 @@ bool SSD::flushCommandBuffer(vector<bufferElement>& commandBuffer) {
 	return ret;
 }
 
-bool SSD::searchInCommandBuffer(vector<bufferElement>& commandBuffer, int lba) {
+bool SSD::searchInCommandBuffer(int lba) {
 	for (const bufferElement& element : commandBuffer) {
 		if (element.command == "W") {
 			if (element.lba == lba) {
+				cout << "found in W" << endl;
 				ofstream outputFile(outputfilePath, ios::trunc);
 				outputFile << element.param;
 				outputFile.close();
@@ -190,6 +197,7 @@ bool SSD::searchInCommandBuffer(vector<bufferElement>& commandBuffer, int lba) {
 		else if (element.command == "E") {
 			int size = stoi(element.param);
 			if ((lba >= element.lba) && (lba < element.lba + size)) {
+				cout << "found in E" << endl;
 				ofstream outputFile(outputfilePath, ios::trunc);
 				outputFile << "0x00000000";
 				outputFile.close();
@@ -201,10 +209,10 @@ bool SSD::searchInCommandBuffer(vector<bufferElement>& commandBuffer, int lba) {
 	return false;
 }
 
-bool SSD::writeToCommandBuffer(int count, string& command, int lba, string& param)
+bool SSD::writeToCommandBuffer(string& command, int lba, string& param)
 {
-	string targetEmptyFile = bufferDirPath + "/" + to_string(count) + "_empty";
+	string targetFileName = bufferDirPath + "/" + to_string(commandBuffer.size() + 1) + "_empty";
 	string newFileName = bufferDirPath + "/" + command + " " + to_string(lba) + " " + param;
-	filesystem::rename(targetEmptyFile, newFileName);
+	filesystem::rename(targetFileName, newFileName);
 	return true;
 }

@@ -12,7 +12,7 @@ int main() {
 #else
 void CombineParametersIntoASingleString(std::string& params, char* argv[], int argc);
 int main(int argc, char* argv[]) {
-    if (argc == 3 || argc == 4) {
+    if (argc >= 2 && argc <= 4) {
         std::string params = "";
         CombineParametersIntoASingleString(params, argv, argc);
  
@@ -25,14 +25,11 @@ int main(int argc, char* argv[]) {
 
 void CombineParametersIntoASingleString(std::string& outParams, char* argv[], int argc)
 {
-    outParams.append(argv[1]);
-    outParams += " ";
-    outParams.append(argv[2]);
-
-    if (argc == 4) {
-        outParams += " ";
-        outParams.append(argv[3]);
+    for (int i = 1; i < argc; i++) {
+        outParams += argv[i];
+        if (i < argc - 1) {
+            outParams += " ";
+        }
     }
-    return;
 }
 #endif
