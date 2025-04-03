@@ -4,13 +4,16 @@
 #include <map>
 
 #include "ssd.h"
-
+#include "logger.cpp"
 using namespace std;
 
 bool 
 SSD::run(string input)
 {
 	bool ret = true;
+
+	Logger logger;
+	logger.print(__FUNCTION__, "Hello");
 
 	stringstream inputStream(input);
 	// 스트림을 통해, 문자열을 공백 분리해 변수에 할당
