@@ -36,5 +36,13 @@ int SSDWriter::execute(vector<string>& param, bool print2Console) {
 	command += data;
 
 	int ret = system(command.c_str());
+	if (ret != 0) {
+		return ret;
+	}
+
+	if (print2Console) {
+		cout << "[Write] Done" << endl;
+	}
+
 	return ret;
 }

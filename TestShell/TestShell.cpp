@@ -14,7 +14,6 @@ int TestShell::run(string command) {
     }
     else if (param[0].compare("write") == 0) {
         result = writer->execute(param);
-        cout << "[Write] Done" << endl;
     }
     else if (param[0].compare("fullread") == 0) {
         if (param.size() != 1) {
@@ -54,6 +53,7 @@ int TestShell::run(string command) {
 
 int TestShell::runFullWrite(std::vector<std::string>& param)
 {
+    bool print2console = false;
     int result = 0;
     vector<string> fullWriteParam = {};
 
@@ -63,7 +63,7 @@ int TestShell::runFullWrite(std::vector<std::string>& param)
         fullWriteParam.push_back(to_string(i));
         fullWriteParam.push_back(data);
 
-        result = writer->execute(fullWriteParam);
+        result = writer->execute(fullWriteParam, print2console);
         if (result != 0) {
             break;
         }
@@ -173,7 +173,7 @@ int TestShell::fullWriteAndReadCompare() {
             writeParam.push_back(to_string(lba++));
             writeParam.push_back(expectedData);
 
-            result = writer->execute(writeParam);
+            result = writer->execute(writeParam, print2Console);
             if (result != 0) {
                 return result;
             }
@@ -216,7 +216,7 @@ int TestShell::partialLBAWrite() {
             writeParam.push_back(lba);
             writeParam.push_back(data);
 
-            result = writer->execute(writeParam);
+            result = writer->execute(writeParam, print2Console);
             if (result != 0) {
                 return result;
             }
@@ -267,7 +267,7 @@ int TestShell::writeReadAging() {
             testParam.push_back("write");
             testParam.push_back(lba);
             testParam.push_back(dataValue[idx++]);
-            result = writer->execute(testParam);
+            result = writer->execute(testParam, print2Console);
             if (result != 0) {
                 //break;
                 return 1;
