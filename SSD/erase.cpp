@@ -1,4 +1,4 @@
-#include "erase.h"
+ï»¿#include "erase.h"
 
 bool EraseSSD::execute(std::map<int, std::string>& nand, int lba, const std::string& size) {
 	bool ret = false;
@@ -36,7 +36,7 @@ bool EraseSSD::GetSizeAfterCheckInvalidSizeOrNot(const std::string& sizeStr, int
 	try {
 		size = std::stoi(sizeStr);
 
-		// 0Àº ¿¡·¯°¡ ¾Æ´Ï¶ó°í ÇßÀ½.
+		// 0ì€ ì—ëŸ¬ê°€ ì•„ë‹ˆë¼ê³  í–ˆìŒ.
 		if (size < 0 || size > 10) {
 			ret = true;
 		}
