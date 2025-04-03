@@ -60,7 +60,6 @@ bool EraseSSD::updateSSDNandFile(std::map<int, std::string>& nand) {
 	}
 
 	for (const auto& pair : nand) {
-		std::cout << "key : " << pair.first << ", value : " << pair.second << std::endl;
 		outFile << pair.first << " " << pair.second << std::endl;
 	}
 
