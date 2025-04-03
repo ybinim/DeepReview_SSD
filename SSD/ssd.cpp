@@ -19,13 +19,11 @@ bool SSD::run(string input) {
 
 	if (isInvalidCommand(commandStr))
 	{
-		cout << "invalid" << endl;
 		return false;
 	}
 
 	if ((commandStr != "F") && isInvalidLBA(lbaStr))
 	{
-		cout << "invalidinvalid" << endl;
 		ofstream outputFile(outputfilePath, ios::trunc);
 		outputFile << "ERROR";
 		return false;
@@ -62,7 +60,7 @@ bool SSD::run(string input) {
 				return ret;
 			}
 		}
-		ret = writeToCommandBuffer(commandStr, lba, dataStr);
+		ret = updateCommandBuffer(commandStr, lba, dataStr);
 	}
 
 	return ret;
@@ -116,7 +114,9 @@ void SSD::readFileAndUpdateMap(map<int, string>& map) {
 
 void SSD::loadCommandBuffer() {
 	if (filesystem::exists(bufferDirPath) == false) {
-		createEmptyCommandBuffer();
+		// create directory and empty files
+		filesystem::create_directory(bufferDirPath);
+		createCommandBufferFiles();
 		return;
 	}
 
@@ -132,18 +132,8 @@ void SSD::loadCommandBuffer() {
 		string command, lba, param;
 		commandStream >> command >> lba >> param;
 
-		cout << "push back to commandBuffer - " << command << lba << param << endl;
+		cout << "push back to commandBuffer - " << command << " " << lba << " " << param << endl;
 		commandBuffer.push_back({ command, stoi(lba), param });
-	}
-}
-
-void SSD::createEmptyCommandBuffer() {
-	filesystem::create_directory(bufferDirPath);
-	ofstream empty;
-	for (int i = 1; i <= 5; i++) {
-		empty.open(bufferDirPath + "/" + to_string(i) + "_empty");
-		empty.close();
-		cout << "create " << i << " done" << endl;
 	}
 }
 
@@ -173,13 +163,9 @@ bool SSD::flushCommandBuffer() {
 		}
 	}
 
-	for (const auto& file : filesystem::directory_iterator(bufferDirPath)) {
-		filesystem::remove(file);
-	}
-
-	createEmptyCommandBuffer();
-
 	commandBuffer.clear();
+	clearCommandBufferFiles();
+	createCommandBufferFiles();
 	return ret;
 }
 
@@ -209,10 +195,82 @@ bool SSD::searchInCommandBuffer(int lba) {
 	return false;
 }
 
-bool SSD::writeToCommandBuffer(string& command, int lba, string& param)
+bool SSD::updateCommandBuffer(string& command, int lba, string& param)
 {
-	string targetFileName = bufferDirPath + "/" + to_string(commandBuffer.size() + 1) + "_empty";
-	string newFileName = bufferDirPath + "/" + command + " " + to_string(lba) + " " + param;
-	filesystem::rename(targetFileName, newFileName);
-	return true;
+	bool ret = true;
+	bool erased;
+	bool skip = false;
+	auto it = commandBuffer.begin();
+
+	while (it != commandBuffer.end()) {
+		erased = false;
+		if (command == "W") {
+			if ((it->command == "W") && (it->lba == lba)) {
+				// write to same LBA -> overwrite
+				it->param = param;
+				skip = true;
+				break;
+			}
+		}
+		else if (command == "E") {
+			int size = stoi(param);
+			if (it->command == "W") {
+				if ((it->lba >= lba) && (it->lba < lba + size)) {
+					// erase after write -> remove write
+					it = commandBuffer.erase(it);
+					erased = true;
+				}
+			}
+			else if (it->command == "E") {
+				int elememtSize = stoi(it->param);
+				
+				if ((it->lba >= lba) && (it->lba + size <= lba + size)) {
+					// erase wide range -> remove narrow one 
+					it = commandBuffer.erase(it);
+					erased = true;
+				}
+				else if ((it->lba <= lba) && (it->lba + size >= lba + size)) {
+					// erase narrow range -> no need to update command buffer
+					skip = true;
+					break;
+				}
+			}
+		}
+
+		if (!erased) {
+			it++;
+		}
+	}
+
+	if (!skip) {
+		commandBuffer.push_back({ command, lba, param });
+	}
+
+	for (bufferElement& element : commandBuffer) {
+		cout << "command buffer - " << element.command << element.lba << element.param << endl;
+	}
+
+	clearCommandBufferFiles();
+	createCommandBufferFiles();
+}
+
+void SSD::clearCommandBufferFiles() {
+	for (const auto& file : filesystem::directory_iterator(bufferDirPath)) {
+		filesystem::remove(file);
+	}
+}
+
+void SSD::createCommandBufferFiles() {
+	int count = 1;
+	ofstream file;
+	for (bufferElement& element : commandBuffer) {
+		file.open(bufferDirPath + "/" + element.command + " " + to_string(element.lba) + " " + element.param);
+		file.close();
+		count++;
+	}
+	while (count <= 5) {
+		file.open(bufferDirPath + "/" + to_string(count) + "_empty");
+		file.close();
+		count++;
+	}
 }
