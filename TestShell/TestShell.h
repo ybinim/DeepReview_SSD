@@ -8,14 +8,14 @@
 #include <iomanip>
 #include <random>
 
-#include "SSDRunner.h"
+#include "SSDExecutor.h"
 
 using namespace std;
 
 class TestShell
 {
 public:
-    TestShell(SSDRunner* reader, SSDRunner* writer) : reader(reader), writer(writer) {}
+    TestShell(SSDExecutor* reader, SSDExecutor* writer) : reader(reader), writer(writer) {}
     int run(string command);
 
 private:
@@ -29,7 +29,7 @@ private:
     int writeReadAging();
     virtual int readCompare(string& expected);
     void printTestScriptResult(int result);
-
-    SSDRunner* reader;
-    SSDRunner* writer;
+  
+    SSDExecutor* reader;
+    SSDExecutor* writer;
 };

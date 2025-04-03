@@ -2,11 +2,11 @@
 #include <string>
 #include <vector>
 
-#include "SSDRunner.h"
+#include "SSDExecutor.h"
 
 using namespace std;
 
-class SSDWriter : public SSDRunner
+class SSDWriter : public SSDExecutor
 {
 public:
 	int execute(vector<string>& param) override;

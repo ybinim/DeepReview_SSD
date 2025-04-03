@@ -139,7 +139,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SSDReader.h" />
-    <ClInclude Include="SSDRunner.h" />
+    <ClInclude Include="SSDExecutor.h" />
     <ClInclude Include="SSDWriter.h" />
     <ClInclude Include="TestShell.h" />
   </ItemGroup>
