@@ -1,6 +1,6 @@
 #include "gmock/gmock.h"
 #include "Testshell.h"
-#include "SSDRunner.h"
+#include "SSDExecutor.h"
 
 #include <string>
 #include <vector>
@@ -13,7 +13,7 @@ map<int, string> nandText;
 string outputText;
 
 
-class MockReader : public SSDRunner
+class MockReader : public SSDExecutor
 {
 public:
 	int execute(vector<string>& param) override {
@@ -36,7 +36,7 @@ public:
 	}
 };
 
-class MockWriter : public SSDRunner
+class MockWriter : public SSDExecutor
 {
 public:
 	int execute(vector<string>& param) override {
