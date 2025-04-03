@@ -50,7 +50,7 @@ int SSDEraser::erase(int lba, int size) {
 	while ((size > 0) && (lba >= 0) && (lba < 100)) {
 		paramSize = (size < SSD_ERASE_SIZE_LIMIT) ? size : SSD_ERASE_SIZE_LIMIT;
 		
-		string command = "E " + to_string(lba) + " " + to_string(paramSize);
+		string command = "ssd.exe E " + to_string(lba) + " " + to_string(paramSize);
 		ret = system(command.c_str());
 		if (ret != 0) {
 			break;
