@@ -377,7 +377,6 @@ int TestShell::runSSDWriter(int lba, std::string& data, const int& numOfTimes, b
 
         result = writer->execute(writeParam, print2Console);
         if (result != 0) {
-            std::cout << "writer->execute fail. result : " << result << std::endl;
             return result;
         }
     }
