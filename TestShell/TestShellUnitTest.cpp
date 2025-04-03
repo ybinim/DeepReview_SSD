@@ -263,7 +263,7 @@ TEST_F(TestShellTestFixture, FullReadTestAfterFullWrite)
 
 class MockTestShell : public TestShell {
 public:
-	MockTestShell(SSDRunner* reader, SSDRunner* writer) :
+	MockTestShell(SSDExecutor* reader, SSDExecutor* writer) :
 		TestShell{ reader, writer } {
 	}
 	MOCK_METHOD(int, readCompare, (string& expected), (override));
