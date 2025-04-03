@@ -1,4 +1,4 @@
-#include "gmock/gmock.h"
+﻿#include "gmock/gmock.h"
 #include <string>
 #include <map>
 #include <fstream>
@@ -186,25 +186,26 @@ TEST_F(SSDFixture, WriteFileUpdateChangeMapValueTest)
 	EXPECT_EQ("2 0xDDDDDDDD", output);
 }
 
-TEST_F(SSDFixture, SSDTest_EraseValidSizeCommand)
+TEST_F(SSDFixture, SSDTest_EraseValidSizeTest)
 {
 	bool ret = mySsd.run("E 0 10");
 	EXPECT_EQ(ret, true);
 }
 
-TEST_F(SSDFixture, SSDTest_EraseInValidSizeCommand)
+TEST_F(SSDFixture, SSDTest_EraseInValidSizeTest)
 {
 	bool ret = mySsd.run("E 0 -1");
 	EXPECT_EQ(ret, true);
 }
 
-TEST_F(SSDFixture, SSDTest_EraseInValidSizeCommand)
+TEST_F(SSDFixture, SSDTest_EraseValidSizeTest)
 {
+	// Size 0은 에러는 아니다. 아무런 동작을 하지 않는다.
 	bool ret = mySsd.run("E 0 0");
 	EXPECT_EQ(ret, true);
 }
 
-TEST_F(SSDFixture, SSDTest_EraseInValidSizeCommand)
+TEST_F(SSDFixture, SSDTest_EraseInValidSizeTest2)
 {
 	bool ret = mySsd.run("E 0 11");
 	EXPECT_EQ(ret, true);
@@ -212,12 +213,13 @@ TEST_F(SSDFixture, SSDTest_EraseInValidSizeCommand)
 
 TEST_F(SSDFixture, SSDTest_EraseValidSizeButOutOfRange)
 {
-	bool ret = mySsd.run("D 95 10");
+	// 99까지만 처리함.
+	bool ret = mySsd.run("E 95 10");
 	EXPECT_EQ(ret, false);
 }
 
 TEST_F(SSDFixture, SSDTest_EraseInValidLBA)
 {
-	bool ret = mySsd.run("D 100 10");
+	bool ret = mySsd.run("E 100 10");
 	EXPECT_EQ(ret, false);
 }
