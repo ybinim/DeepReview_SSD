@@ -1,6 +1,4 @@
 ﻿#include "TestShell.h"
-#include <iomanip>
-#include <fstream>
 
 using namespace std;
 
@@ -104,6 +102,78 @@ vector<string> TestShell::parseCommand(string& command, char delimiter) {
     }
 
     return result;
+}
+
+int TestShell::fullWriteAndReadCompare() {
+    return 0;
+}
+
+int TestShell::partialLBAWrite() {
+    return 0;
+}
+
+int TestShell::writeReadAging() {
+    int result = 0;
+    vector<string> lbaList = { "0", "99"};
+    vector<string> testParam = {};
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<unsigned int> dis(0x0, 0xFFFFFFFF);
+    unsigned int randValue;
+    
+    for (int count = 0; count < 200; count++) {
+        std::stringstream ss;
+        vector<string> dataValue;
+        int idx = 0;
+
+        for (const string& lba : lbaList) {
+            randValue = dis(gen);
+            ss << "0x" << std::setw(8) << std::setfill('0') << std::hex << std::uppercase << randValue;
+            //std::cout << "Random Value : " << ss.str() << "\n";
+
+            dataValue[idx] = ss.str();
+            testParam.push_back("write");
+            testParam.push_back(lba);
+            testParam.push_back(dataValue[idx++]);
+            result = writer->execute(testParam);
+            if (result != 0) {
+                //break;
+                return 1;
+            }
+            testParam.clear();
+        }
+
+        idx = 0;
+        for (const string& lba : lbaList) {
+            testParam.push_back("read");
+            testParam.push_back(lba);
+
+            result = reader->execute(testParam);
+            if (result != 0) {
+                //break;
+                return 1;
+            }
+
+            result = readCompare(dataValue[idx++]);
+            if (result != 0) {
+                //break;
+                return 1;
+            }
+            testParam.clear();
+        }
+        dataValue.clear();
+    }
+
+    return 0;
+}
+
+void TestShell::printTestScriptResult(int result) {
+    if (result == 0) {
+        cout << "PASS" << endl;
+    }
+    else {
+        cout << "FAIL" << endl;
+    }
 }
 
 void TestShell::printHelp() {
