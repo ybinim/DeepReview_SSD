@@ -487,3 +487,18 @@ TEST_F(TestShellTestFixture, 2_PartialLBAWriteTestWithReadCompareFailCondition)
 	EXPECT_EQ(-1, mockShell.run("2_"));
 
 }
+
+TEST_F(TestShellTestFixture, EraseAndWriteAgingValidTest)
+{
+	int ret = shell->run("4_EraseAndWriteAging");
+	EXPECT_EQ(ret, 0);
+
+	ret = shell->run("4_");
+	EXPECT_EQ(ret, 0);
+
+	ret = shell->run("4");
+	EXPECT_EQ(ret, -1);
+
+	ret = shell->run("4__");
+	EXPECT_EQ(ret, -1);
+}
