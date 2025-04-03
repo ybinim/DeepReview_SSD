@@ -3,6 +3,7 @@
 
 #include "write.h"
 #include "read.h"
+#include "erase.h"
 
 class SSD {
 public:
@@ -14,6 +15,7 @@ public:
 private:
 	WriteSSD myWrite;
 	ReadSSD myRead;
+	EraseSSD myErase;
 
 	const std::string outputfilePath = "ssd_output.txt";
 	const std::string nandfilePath = "ssd_nand.txt";

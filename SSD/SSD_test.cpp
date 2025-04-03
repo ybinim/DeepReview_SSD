@@ -1,4 +1,4 @@
-#include "gmock/gmock.h"
+﻿#include "gmock/gmock.h"
 #include <string>
 #include <map>
 #include <fstream>
@@ -184,4 +184,87 @@ TEST_F(SSDFixture, WriteFileUpdateChangeMapValueTest)
 	std::string output = "";
 	std::getline(file, output);
 	EXPECT_EQ("2 0xDDDDDDDD", output);
+}
+
+TEST_F(SSDFixture, EraseTest_ValidSize)
+{
+	bool ret = mySsd.run("E 0 10");
+	EXPECT_EQ(ret, true);
+}
+
+TEST_F(SSDFixture, EraseTest_ValidSize2)
+{
+	// Size 0은 에러는 아니다. 아무런 동작을 하지 않는다.
+	bool ret = mySsd.run("E 0 0");
+	EXPECT_EQ(ret, true);
+}
+
+TEST_F(SSDFixture, EraseTest_InValidSize)
+{
+	bool ret = mySsd.run("E 0 -1");
+	EXPECT_EQ(ret, false);
+	validCheckOfOutputFile("ERROR");
+}
+
+TEST_F(SSDFixture, EraseTest_InValidSize2)
+{
+	bool ret = mySsd.run("E 0 11");
+	EXPECT_EQ(ret, false);
+	validCheckOfOutputFile("ERROR");
+}
+
+TEST_F(SSDFixture, EraseTest_ValidSizeButOutOfRange)
+{
+	// 99까지만 처리함.
+	bool ret = mySsd.run("E 95 10");
+	EXPECT_EQ(ret, true);
+}
+
+TEST_F(SSDFixture, EraseTest_InValidLBA)
+{
+	bool ret = mySsd.run("E 100 10");
+	EXPECT_EQ(ret, false);
+	validCheckOfOutputFile("ERROR");
+}
+
+TEST_F(SSDFixture, EraseTest_WriteAndErase)
+{
+	mySsd.run("W 0 0x12345678");
+	mySsd.run("W 1 0xCCCCCCCC");
+	mySsd.run("W 2 0x1234ABCD");
+	mySsd.run("W 3 0xCCCCCCCC");
+	mySsd.run("W 4 0x00000000");
+	mySsd.run("W 5 0x5555AAAA");
+	mySsd.run("W 6 0xCCCCCCCC");
+
+	bool ret = mySsd.run("E 4 10");
+	EXPECT_EQ(ret, true);
+
+	for (int i = 4; i < 14; i++)
+	{
+		std::string command = "R ";
+		command.append(std::to_string(i));
+		mySsd.run(command);
+		validCheckOfOutputFile("0x00000000");
+	}
+}
+
+TEST_F(SSDFixture, EraseTest_WriteAndEraseWithSizeZero)
+{
+	mySsd.run("W 97 0x12345678");
+	mySsd.run("W 98 0xCCCCCCCC");
+	mySsd.run("W 99 0x1234ABCD");
+
+	bool ret = mySsd.run("E 1 0");
+	EXPECT_EQ(ret, true);
+}
+
+TEST_F(SSDFixture, EraseTest_WriteAndEraseWithSize1)
+{
+	mySsd.run("W 97 0x12345670");
+	mySsd.run("W 98 0xCCCCCCC0");
+	mySsd.run("W 99 0x1234ABC0");
+
+	bool ret = mySsd.run("E 1 1");
+	EXPECT_EQ(ret, true);
 }
