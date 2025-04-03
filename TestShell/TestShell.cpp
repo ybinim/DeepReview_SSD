@@ -26,7 +26,9 @@ int TestShell::run(string command) {
             return -2;
         }
         result = runFullWrite(param);
-        cout << "[FullWrite] Done" << endl;
+    }
+    else if ((param[0].compare("erase") == 0) || (param[0].compare("erase_range") == 0)) {
+        result = eraser->execute(param);
     }
     else if (param[0].compare("help") == 0) {
         printHelp();
