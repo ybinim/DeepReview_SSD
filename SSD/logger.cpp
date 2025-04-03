@@ -1,22 +1,19 @@
 #include "logger.h"
-
 ofstream Logger::logFile;
 const string Logger::logFileName = "latest.log";
 const size_t Logger::MAX_FILE_SIZE = 10240;  // 10 KB
 
 void Logger::openLogFile() {
-    if (!logFile.is_open()) {
-        if (fileSizeExceedsLimit(logFileName)) {
-            renameOldLogFile();  
-            logFile.open(logFileName, std::ios::app);
-        }
-        else {
-            logFile.open(logFileName, std::ios::app);
-        }
+    if (fileSizeExceedsLimit(logFileName)) {
+        renameOldLogFile();
+        logFile.open(logFileName, std::ios::app);
+    }
+    else {
+        logFile.open(logFileName, std::ios::app);
+    }
 
-        if (!logFile.is_open()) {
-            std::cerr << "Error opening log file!" << std::endl;
-        }
+    if (!logFile.is_open()) {
+        std::cerr << "Error opening log file!" << std::endl;
     }
 }
 
@@ -27,9 +24,39 @@ void Logger::closeLogFile() {
 }
 
 void Logger::renameOldLogFile() {
-    string newFileName = generateNewFileName();
-    if (std::filesystem::exists(logFileName)) {
-        std::filesystem::rename(logFileName, newFileName);
+    if (filesystem::exists(logFileName)) {
+        string newFileName = generateNewFileName();
+        filesystem::rename(logFileName, newFileName);
+    }
+}
+
+void Logger::renameOldLogToZip() {
+    vector<filesystem::directory_entry> logFiles;
+    for (const auto& entry : filesystem::directory_iterator(".")) {
+        if (entry.is_regular_file() && entry.path().filename().string().find("until_") == 0) {
+            logFiles.push_back(entry);
+        }
+    }
+
+    if (logFiles.size() > 1) {
+        auto oldestFile = *min_element(logFiles.begin(), logFiles.end(),
+            [](const filesystem::directory_entry& a, const filesystem::directory_entry& b) {
+                return filesystem::last_write_time(a) < filesystem::last_write_time(b);
+            });
+
+        filesystem::path oldestFilePath = oldestFile.path();
+        if (oldestFilePath.extension() != ".zip") {
+            filesystem::path tempFilePath = oldestFilePath;
+            filesystem::path zipFilePath;
+            zipFilePath = tempFilePath.replace_extension(".zip");
+
+            try {
+                filesystem::rename(oldestFilePath, zipFilePath);
+            }
+            catch (const filesystem::filesystem_error& e) {
+                std::cerr << "Error renaming file: " << e.what() << std::endl;
+            }
+        }
     }
 }
 
@@ -56,6 +83,7 @@ bool Logger::fileSizeExceedsLimit(const string& fileName) {
 
 void Logger::print(const string& classFuncName, const string& message) {
     openLogFile();
+    renameOldLogToZip();
 
     if (logFile.is_open()) {
         time_t now = time(nullptr);
