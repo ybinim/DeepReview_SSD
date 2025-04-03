@@ -15,7 +15,8 @@ using namespace std;
 class TestShell
 {
 public:
-    TestShell(SSDExecutor* reader, SSDExecutor* writer) : reader(reader), writer(writer) {}
+    TestShell(SSDExecutor* reader, SSDExecutor* writer, SSDExecutor* eraser, SSDExecutor* flusher)
+        : reader(reader), writer(writer), eraser(eraser), flusher(flusher) {}
     int run(string command);
 
 private:
@@ -29,7 +30,12 @@ private:
     int writeReadAging();
     virtual int readCompare(string& expected);
     void printTestScriptResult(int result);
-  
+    int eraseAndWriteAging();
+    int runSSDEraser(int startLBA, const int endLBA, bool print2Console);
+    int runSSDWriter(int lba, std::string& data, const int& numOfTimes, bool print2Console);
+
     SSDExecutor* reader;
     SSDExecutor* writer;
+    SSDExecutor* eraser;
+    SSDExecutor* flusher;
 };

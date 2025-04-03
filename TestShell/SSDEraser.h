@@ -6,8 +6,11 @@
 
 using namespace std;
 
-class SSDWriter : public SSDExecutor
+class SSDEraser : public SSDExecutor
 {
 public:
 	int execute(vector<string>& param, bool print2Console = true) override;
+
+private:
+	int erase(int lba, int size);
 };

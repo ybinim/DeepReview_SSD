@@ -16,7 +16,7 @@ string outputText;
 class MockReader : public SSDExecutor
 {
 public:
-	int execute(vector<string>& param) override {
+	int execute(vector<string>& param, bool print2Console = true) override {
 		if (param.size() != 2) {
 			return -2;
 		}
@@ -39,7 +39,7 @@ public:
 class MockWriter : public SSDExecutor
 {
 public:
-	int execute(vector<string>& param) override {
+	int execute(vector<string>& param, bool print2Console = true) override {
 		if (param.size() != 3) {
 			return -2;
 		}
@@ -76,16 +76,81 @@ public:
 	}
 };
 
+class MockEraser : public SSDExecutor
+{
+public:
+	int execute(vector<string>& param, bool print2Console) override {
+		if (param.size() != 3) {
+			return -2;
+		}
+
+		int lba = 0;
+		int size = 0;
+
+		if (param[0].compare("erase") == 0) {
+			if (param[1].length() > 2 || isNumber(param[1]) == false) {
+				return -2;
+			}
+			if (isNumber(param[2]) == false) {
+				return -2;
+			}
+
+			lba = stoi(param[1]);
+			size = stoi(param[2]);
+		}
+		else if (param[0].compare("erase_range") == 0) {
+			if (param[1].length() > 2 || isNumber(param[1]) == false) {
+				return -2;
+			}
+			if (param[2].length() > 2 || isNumber(param[2]) == false) {
+				return -2;
+			}
+
+			lba = stoi(param[1]);
+			size = stoi(param[2]) - lba + 1;
+			if (size < 0) {
+				return -2;
+			}
+		}
+
+		int ret = erase(lba, size);
+		return ret;
+	}
+
+	int erase(int lba, int size) {
+		while ((size > 0) && (lba >= 0) && (lba < 100)) {
+			nandText.erase(lba);
+			lba++;
+			size--;
+		}
+		return 0;
+	}
+};
+
+class MockFlusher : public SSDExecutor
+{
+public:
+	int execute(vector<string>& param, bool print2Console = true) override {
+		if(param.size() != 1) {
+			return -2;
+		}
+
+		return 0;
+	}
+};
+
 class TestShellTestFixture : public Test
 {
 public:
 	MockReader reader;
 	MockWriter writer;
+	MockEraser eraser;
+	MockFlusher flusher;
 	TestShell* shell;
 
 protected:
 	void SetUp() override {
-		shell = new TestShell(&reader, &writer);
+		shell = new TestShell(&reader, &writer, &eraser, &flusher);
 		nandText.clear();
 		outputText = "";
 	}
@@ -261,10 +326,139 @@ TEST_F(TestShellTestFixture, FullReadTestAfterFullWrite)
 	}
 }
 
+TEST_F(TestShellTestFixture, EraseParamTest)
+{
+	int ret = shell->run("erase 0 10");
+	EXPECT_EQ(ret, 0);
+
+	ret = shell->run("erase 99 10");
+	EXPECT_EQ(ret, 0);
+
+	ret = shell->run("erase 0 100");
+	EXPECT_EQ(ret, 0);
+
+	ret = shell->run("erase 0 0");
+	EXPECT_EQ(ret, 0);
+
+	ret = shell->run("erase -1 5");
+	EXPECT_EQ(ret, -2);
+
+	ret = shell->run("erase 0 a");
+	EXPECT_EQ(ret, -2);
+}
+
+TEST_F(TestShellTestFixture, EraseRangeParamTest)
+{
+	int ret = shell->run("erase_range 0 10");
+	EXPECT_EQ(ret, 0);
+
+	ret = shell->run("erase_range 10 10");
+	EXPECT_EQ(ret, 0);
+
+	ret = shell->run("erase_range 5 99");
+	EXPECT_EQ(ret, 0);
+
+	ret = shell->run("erase_range -1 5");
+	EXPECT_EQ(ret, -2);
+
+	ret = shell->run("erase_range 99 100");
+	EXPECT_EQ(ret, -2);
+
+	ret = shell->run("erase_range 10 8");
+	EXPECT_EQ(ret, -2);
+}
+
+TEST_F(TestShellTestFixture, EraseTest)
+{
+	// precondition
+	for (int i = 0; i < 100; i++) {
+		nandText.emplace(i, "0xAAAAAAAA");
+	}
+
+	// erase nothing
+	int ret = shell->run("erase 0 0");
+	EXPECT_EQ(ret, 0);
+
+	for (int i = 0; i <= 99; i++) {
+		EXPECT_EQ(nandText.find(i)->second, "0xAAAAAAAA");
+	}
+
+	// erase LBA 5~9
+	ret = shell->run("erase 5 5");
+	EXPECT_EQ(ret, 0);
+
+	for (int i = 0; i <= 4; i++) {
+		EXPECT_EQ(nandText.find(i)->second, "0xAAAAAAAA");
+	}
+	for (int i = 5; i <= 9; i++) {
+		EXPECT_EQ(nandText.find(i), nandText.end());
+	}
+	for (int i = 10; i <= 99; i++) {
+		EXPECT_EQ(nandText.find(i)->second, "0xAAAAAAAA");
+	}
+
+	// erase LBA 8~99
+	ret = shell->run("erase 8 100");
+	EXPECT_EQ(ret, 0);
+
+	for (int i = 0; i <= 4; i++) {
+		EXPECT_EQ(nandText.find(i)->second, "0xAAAAAAAA");
+	}
+	for (int i = 5; i <= 99; i++) {
+		EXPECT_EQ(nandText.find(i), nandText.end());
+	}
+}
+
+TEST_F(TestShellTestFixture, EraseRangeTest)
+{
+	// precondition
+	for (int i = 0; i < 100; i++) {
+		nandText.emplace(i, "0xAAAAAAAA");
+	}
+
+	// erase LBA 0
+	int ret = shell->run("erase_range 0 0");
+	EXPECT_EQ(ret, 0);
+
+	EXPECT_EQ(nandText.find(0), nandText.end());
+	for (int i = 1; i <= 99; i++) {
+		EXPECT_EQ(nandText.find(i)->second, "0xAAAAAAAA");
+	}
+
+	// erase LBA 5
+	ret = shell->run("erase_range 5 5");
+	EXPECT_EQ(ret, 0);
+
+	EXPECT_EQ(nandText.find(0), nandText.end());
+	for (int i = 1; i <= 4; i++) {
+		EXPECT_EQ(nandText.find(i)->second, "0xAAAAAAAA");
+	}
+	EXPECT_EQ(nandText.find(5), nandText.end());
+	for (int i = 6; i <= 99; i++) {
+		EXPECT_EQ(nandText.find(i)->second, "0xAAAAAAAA");
+	}
+
+	// erase LBA 10~99
+	ret = shell->run("erase_range 10 99");
+	EXPECT_EQ(ret, 0);
+
+	EXPECT_EQ(nandText.find(0), nandText.end());
+	for (int i = 1; i <= 4; i++) {
+		EXPECT_EQ(nandText.find(i)->second, "0xAAAAAAAA");
+	}
+	EXPECT_EQ(nandText.find(5), nandText.end());
+	for (int i = 6; i <= 9; i++) {
+		EXPECT_EQ(nandText.find(i)->second, "0xAAAAAAAA");
+	}
+	for (int i = 10; i <= 99; i++) {
+		EXPECT_EQ(nandText.find(i), nandText.end());
+	}
+}
+
 class MockTestShell : public TestShell {
 public:
-	MockTestShell(SSDExecutor* reader, SSDExecutor* writer) :
-		TestShell{ reader, writer } {
+	MockTestShell(SSDExecutor* reader, SSDExecutor* writer, SSDExecutor* eraser, SSDExecutor* flusher) :
+		TestShell{ reader, writer, eraser, flusher } {
 	}
 	MOCK_METHOD(int, readCompare, (string& expected), (override));
 
@@ -272,7 +466,7 @@ public:
 
 TEST_F(TestShellTestFixture, 2_PartialLBAWriteTestWithReadComparePassCondition)
 {
-	MockTestShell mockShell(&reader, &writer);
+	MockTestShell mockShell(&reader, &writer, &eraser, &flusher);
 
 	EXPECT_CALL(mockShell, readCompare(_))
 		.Times(150)
@@ -284,7 +478,7 @@ TEST_F(TestShellTestFixture, 2_PartialLBAWriteTestWithReadComparePassCondition)
 
 TEST_F(TestShellTestFixture, 2_PartialLBAWriteTestWithReadCompareFailCondition)
 {
-	MockTestShell mockShell(&reader, &writer);
+	MockTestShell mockShell(&reader, &writer, &eraser, &flusher);
 
 	EXPECT_CALL(mockShell, readCompare(_))
 		.Times(1)
@@ -292,4 +486,19 @@ TEST_F(TestShellTestFixture, 2_PartialLBAWriteTestWithReadCompareFailCondition)
 
 	EXPECT_EQ(-1, mockShell.run("2_"));
 
+}
+
+TEST_F(TestShellTestFixture, EraseAndWriteAgingValidTest)
+{
+	int ret = shell->run("4_EraseAndWriteAging");
+	EXPECT_EQ(ret, 0);
+
+	ret = shell->run("4_");
+	EXPECT_EQ(ret, 0);
+
+	ret = shell->run("4");
+	EXPECT_EQ(ret, -1);
+
+	ret = shell->run("4__");
+	EXPECT_EQ(ret, -1);
 }
