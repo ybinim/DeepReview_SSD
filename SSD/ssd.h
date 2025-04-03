@@ -21,10 +21,11 @@ private:
 	bool isInvalidLBA(std::string& command);
 	void readFileAndUpdateMap(std::map<int, std::string>& map);
 	void loadCommandBuffer();
-	void createEmptyCommandBuffer();
 	bool flushCommandBuffer();
 	bool searchInCommandBuffer(int lba);
-	bool writeToCommandBuffer(std::string& command, int lba, std::string& param);
+	bool updateCommandBuffer(std::string& command, int lba, std::string& param);
+	void clearCommandBufferFiles();
+	void createCommandBufferFiles();
 
 	WriteSSD myWrite;
 	ReadSSD myRead;
