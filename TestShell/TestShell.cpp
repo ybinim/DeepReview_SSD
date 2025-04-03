@@ -157,7 +157,48 @@ void TestShell::printHelp() {
 }
 
 int TestShell::fullWriteAndReadCompare() {
-    return 0;
+    string expectedData = "0xAAAABBBB";
+    vector<string> writeParam;
+    vector<string> readParam;
+    int result = 0;
+    int lba = 0;
+    int loopcount = 5;
+
+    while (lba < 100)
+    {
+        for (int writecount = 0; writecount < loopcount; writecount++)
+        {
+            writeParam.push_back("write");
+            writeParam.push_back(to_string(lba++));
+            writeParam.push_back(expectedData);
+
+            result = writer->execute(writeParam);
+            if (result != 0) {
+                return result;
+            }
+            writeParam.clear();
+        }
+
+        lba = lba - loopcount;
+        for (int comparecount = 0; comparecount < loopcount; comparecount++)
+        {
+            readParam.push_back("read");
+            readParam.push_back(to_string(lba++));
+
+            result = reader->execute(readParam);
+            if (result != 0) {
+                return result;
+            }
+            readParam.clear();
+
+            result = readCompare(expectedData);
+            if (result != 0) {
+                return result;
+            }
+        }
+    }
+
+    return result;
 }
 
 int TestShell::partialLBAWrite() {
