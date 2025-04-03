@@ -14,7 +14,6 @@ int TestShell::run(string command) {
     }
     else if (param[0].compare("write") == 0) {
         result = writer->execute(param);
-        cout << "[Write] Done" << endl;
     }
     else if (param[0].compare("fullread") == 0) {
         if (param.size() != 1) {
@@ -54,6 +53,7 @@ int TestShell::run(string command) {
 
 int TestShell::runFullWrite(std::vector<std::string>& param)
 {
+    bool print2console = false;
     int result = 0;
     vector<string> fullWriteParam = {};
 
@@ -63,7 +63,7 @@ int TestShell::runFullWrite(std::vector<std::string>& param)
         fullWriteParam.push_back(to_string(i));
         fullWriteParam.push_back(data);
 
-        result = writer->execute(fullWriteParam);
+        result = writer->execute(fullWriteParam, print2console);
         if (result != 0) {
             break;
         }
@@ -157,10 +157,53 @@ void TestShell::printHelp() {
 }
 
 int TestShell::fullWriteAndReadCompare() {
-    return 0;
+    bool print2Console = false;
+    string expectedData = "0xAAAABBBB";
+    vector<string> writeParam;
+    vector<string> readParam;
+    int result = 0;
+    int lba = 0;
+    int loopcount = 5;
+
+    while (lba < 100)
+    {
+        for (int writecount = 0; writecount < loopcount; writecount++)
+        {
+            writeParam.push_back("write");
+            writeParam.push_back(to_string(lba++));
+            writeParam.push_back(expectedData);
+
+            result = writer->execute(writeParam, print2Console);
+            if (result != 0) {
+                return result;
+            }
+            writeParam.clear();
+        }
+
+        lba = lba - loopcount;
+        for (int comparecount = 0; comparecount < loopcount; comparecount++)
+        {
+            readParam.push_back("read");
+            readParam.push_back(to_string(lba++));
+
+            result = reader->execute(readParam, print2Console);
+            if (result != 0) {
+                return result;
+            }
+            readParam.clear();
+
+            result = readCompare(expectedData);
+            if (result != 0) {
+                return result;
+            }
+        }
+    }
+
+    return result;
 }
 
 int TestShell::partialLBAWrite() {
+    bool print2Console = false;
     string data = "0x11223344";
     vector<string> lbaList = { "4", "0", "3", "1", "2"};
     vector<string> writeParam;
@@ -173,7 +216,7 @@ int TestShell::partialLBAWrite() {
             writeParam.push_back(lba);
             writeParam.push_back(data);
 
-            result = writer->execute(writeParam);
+            result = writer->execute(writeParam, print2Console);
             if (result != 0) {
                 return result;
             }
@@ -184,7 +227,7 @@ int TestShell::partialLBAWrite() {
             readParam.push_back("read");
             readParam.push_back(lba);
 
-            result = reader->execute(readParam);
+            result = reader->execute(readParam, print2Console);
             if (result != 0) {
                 return result;
             }
@@ -201,6 +244,7 @@ int TestShell::partialLBAWrite() {
 }
 
 int TestShell::writeReadAging() {
+    bool print2Console = false;
     int result = 0;
     int idx = 0;
     vector<string> lbaList = { "0", "99" };
@@ -223,7 +267,7 @@ int TestShell::writeReadAging() {
             testParam.push_back("write");
             testParam.push_back(lba);
             testParam.push_back(dataValue[idx++]);
-            result = writer->execute(testParam);
+            result = writer->execute(testParam, print2Console);
             if (result != 0) {
                 //break;
                 return 1;
@@ -236,7 +280,7 @@ int TestShell::writeReadAging() {
             testParam.push_back("read");
             testParam.push_back(lba);
 
-            result = reader->execute(testParam);
+            result = reader->execute(testParam, print2Console);
             if (result != 0) {
                 //break;
                 return 1;

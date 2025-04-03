@@ -4,7 +4,30 @@
 
 using namespace std;
 
-int SSDReader::execute(vector<string>& param) {
+int SSDReader::execute(vector<string>& param, bool print2Console) {
+	int ret = 0;
+
+	ret = checkValidity(param);
+	if (ret !=0 ) {
+		return ret;
+	}
+
+	string lba = param[1];
+	string command = "ssd.exe R ";
+	command += lba;
+
+	ret = system(command.c_str());
+	if (ret != 0) {
+		return ret;
+	}
+
+	if (print2Console)
+		print2console(lba);
+
+	return ret;
+}
+
+int SSDReader::checkValidity(vector<string>& param) {
 	if (param.size() != 2) {
 		return -2;
 	}
@@ -15,19 +38,13 @@ int SSDReader::execute(vector<string>& param) {
 		return -2;
 	}
 
-	string command = "ssd.exe R ";
-	command += lba;
+	return 0;
+}
 
-	int ret = system(command.c_str());
-	if (ret != 0) {
-		return ret;
-	}
-
+void SSDReader::print2console(string lba) {
 	ifstream outputFile(outputFilePath.c_str());
 	string data = "";
 	getline(outputFile, data);
 
 	cout << "[Read] LBA " << lba << " : " << data << endl;
-
-	return ret;
 }
