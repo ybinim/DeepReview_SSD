@@ -168,7 +168,7 @@ int TestShell::partialLBAWrite() {
 
             result = writer->execute(writeParam);
             if (result != 0) {
-                break;
+                return result;
             }
             writeParam.clear();
         }
@@ -179,12 +179,12 @@ int TestShell::partialLBAWrite() {
 
             result = reader->execute(readParam);
             if (result != 0) {
-                break;
+                return result;
             }
             
             result = readCompare(data);
             if (result != 0) {
-                break;
+                return result;
             }
             readParam.clear();
         }
