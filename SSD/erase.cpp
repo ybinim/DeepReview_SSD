@@ -2,6 +2,7 @@
 
 bool EraseSSD::execute(std::map<int, std::string>& nand, int lba, const std::string& size) {
 	bool ret = false;
+	int eraseSize = 0;
 	if (ret = GetSizeAfterCheckInvalidSizeOrNot(size, &eraseSize))
 	{
 		std::ofstream outputFile(outputfilePath, std::ios::trunc);

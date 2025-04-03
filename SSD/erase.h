@@ -16,7 +16,6 @@ private:
 
     const std::string outputfilePath = "ssd_output.txt";
     const std::string nandfilePath = "ssd_nand.txt";
-    int eraseSize = 0;
 };
 
 #endif

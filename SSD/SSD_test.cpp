@@ -239,6 +239,14 @@ TEST_F(SSDFixture, EraseTest_WriteAndErase)
 
 	bool ret = mySsd.run("E 4 10");
 	EXPECT_EQ(ret, true);
+
+	for (int i = 4; i < 14; i++)
+	{
+		std::string command = "R ";
+		command.append(std::to_string(i));
+		mySsd.run(command);
+		validCheckOfOutputFile("0x00000000");
+	}
 }
 
 TEST_F(SSDFixture, EraseTest_WriteAndEraseWithSizeZero)
