@@ -30,6 +30,9 @@ int TestShell::run(string command) {
     else if ((param[0].compare("erase") == 0) || (param[0].compare("erase_range") == 0)) {
         result = eraser->execute(param);
     }
+    else if (param[0].compare("flush") == 0) {
+        result = flusher->execute(param);
+    }
     else if (param[0].compare("help") == 0) {
         printHelp();
     }

@@ -133,6 +133,7 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SSDEraser.cpp" />
+    <ClCompile Include="SSDFlusher.cpp" />
     <ClCompile Include="SSDReader.cpp" />
     <ClCompile Include="SSDWriter.cpp" />
     <ClCompile Include="TestShell.cpp" />
@@ -140,6 +141,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SSDEraser.h" />
+    <ClInclude Include="SSDFlusher.h" />
     <ClInclude Include="SSDReader.h" />
     <ClInclude Include="SSDExecutor.h" />
     <ClInclude Include="SSDWriter.h" />

@@ -15,8 +15,8 @@ using namespace std;
 class TestShell
 {
 public:
-    TestShell(SSDExecutor* reader, SSDExecutor* writer, SSDExecutor* eraser)
-        : reader(reader), writer(writer), eraser(eraser) {}
+    TestShell(SSDExecutor* reader, SSDExecutor* writer, SSDExecutor* eraser, SSDExecutor* flusher)
+        : reader(reader), writer(writer), eraser(eraser), flusher(flusher) {}
     int run(string command);
 
 private:
@@ -34,4 +34,5 @@ private:
     SSDExecutor* reader;
     SSDExecutor* writer;
     SSDExecutor* eraser;
+    SSDExecutor* flusher;
 };
