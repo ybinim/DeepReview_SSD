@@ -259,6 +259,7 @@ TEST_F(TestShellTestFixture, 2_PartialLBAWriteTestWithReadComparePassCondition)
 	MockTestShell mockShell(&reader, &writer);
 
 	EXPECT_CALL(mockShell, readCompare(_))
+		.Times(150)
 		.WillRepeatedly(Return(0));
 
 	EXPECT_EQ(0, mockShell.run("2_"));
@@ -270,6 +271,7 @@ TEST_F(TestShellTestFixture, 2_PartialLBAWriteTestWithReadCompareFailCondition)
 	MockTestShell mockShell(&reader, &writer);
 
 	EXPECT_CALL(mockShell, readCompare(_))
+		.Times(1)
 		.WillRepeatedly(Return(-1));
 
 	EXPECT_EQ(-1, mockShell.run("2_"));
