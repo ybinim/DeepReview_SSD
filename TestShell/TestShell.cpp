@@ -45,6 +45,10 @@ int TestShell::run(string command) {
         result = writeReadAging();
         printTestScriptResult(result);
     }
+    else if ((param[0].compare("4_EraseAndWriteAging") == 0) || (param[0].compare("4_") == 0)) {
+        result = eraseAndWriteAging();
+        printTestScriptResult(result);
+    }
     else {
         cout << "INVALID COMMAND" << endl;
         return -1;
@@ -312,4 +316,70 @@ int TestShell::readCompare(string& expected) {
         }
     }
     return -1;
+}
+
+int TestShell::eraseAndWriteAging() {
+    bool print2Console = false;
+    string data = "0x1234ABCD";
+    int result = 0;
+    int lba = 0;
+    const int increaseSize = 2;
+
+    result = runSSDEraser(lba, lba+increaseSize, print2Console);
+    if (result != 0) {
+        return result;
+    }
+
+    for (int count = 0; count < 30; count++) {
+        while (lba + increaseSize < 100) {
+            lba += increaseSize;
+            int runNumberOfTimes = 2;
+            result = runSSDWriter(lba, data, runNumberOfTimes, print2Console);
+            if (result != 0) {
+                return result;
+            }
+
+            result = runSSDEraser(lba, lba + increaseSize, print2Console);
+            if (result != 0) {
+                return result;
+            }
+        }
+        lba = 0;
+    }
+
+    return result;
+}
+
+int TestShell::runSSDEraser(int startLBA, int endLBA, bool print2Console)
+{
+    int result = 0;
+    vector<string> eraseParam;
+
+    if (endLBA >= 100) {
+        endLBA = 99;
+    }
+    eraseParam.push_back("erase_range");
+    eraseParam.push_back(std::to_string(startLBA));
+    eraseParam.push_back(std::to_string(endLBA));
+    result = eraser->execute(eraseParam, print2Console);
+    return result;
+}
+
+int TestShell::runSSDWriter(int lba, std::string& data, const int& numOfTimes, bool print2Console)
+{
+    int result = 0;
+    for (int writeCnt = 0; writeCnt < numOfTimes; writeCnt++) {
+        vector<string> writeParam;
+
+        writeParam.push_back("write");
+        writeParam.push_back(std::to_string(lba));
+        writeParam.push_back(data);
+
+        result = writer->execute(writeParam, print2Console);
+        if (result != 0) {
+            std::cout << "writer->execute fail. result : " << result << std::endl;
+            return result;
+        }
+    }
+    return result;
 }
