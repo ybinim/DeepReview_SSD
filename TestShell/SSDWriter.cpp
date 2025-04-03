@@ -4,7 +4,7 @@
 
 using namespace std;
 
-int SSDWriter::execute(vector<string>& param) {
+int SSDWriter::execute(vector<string>& param, bool print2Console) {
 	if (param.size() != 3) {
 		return -2;
 	}

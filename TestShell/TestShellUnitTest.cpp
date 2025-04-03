@@ -16,7 +16,7 @@ string outputText;
 class MockReader : public SSDExecutor
 {
 public:
-	int execute(vector<string>& param) override {
+	int execute(vector<string>& param, bool print2Console = true) override {
 		if (param.size() != 2) {
 			return -2;
 		}
@@ -39,7 +39,7 @@ public:
 class MockWriter : public SSDExecutor
 {
 public:
-	int execute(vector<string>& param) override {
+	int execute(vector<string>& param, bool print2Console = true) override {
 		if (param.size() != 3) {
 			return -2;
 		}
