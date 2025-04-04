@@ -52,18 +52,3 @@ bool EraseSSD::GetSizeAfterCheckInvalidSizeOrNot(const std::string& sizeStr, int
 	*getValidSize = size;
 	return ret;
 }
-
-bool EraseSSD::updateSSDNandFile(std::map<int, std::string>& nand) {
-	std::ofstream outFile(nandfilePath);
-
-	if (!outFile.is_open()) {
-		return false;
-	}
-
-	for (const auto& pair : nand) {
-		outFile << pair.first << " " << pair.second << std::endl;
-	}
-
-	outFile.close();
-	return true;
-}
