@@ -5,6 +5,30 @@
 using namespace std;
 
 int SSDWriter::execute(vector<string>& param, bool print2Console) {
+	int ret = checkParam(param);
+	if (ret != 0) {
+		return ret;
+	}
+
+	string command = "ssd.exe W ";
+	command += param[1];
+	command += " ";
+	command += param[2];
+
+	ret = system(command.c_str());
+	if (ret != 0) {
+		return ret;
+	}
+
+	if (print2Console) {
+		cout << "[Write] Done" << endl;
+	}
+
+	return ret;
+}
+
+int SSDWriter::checkParam(vector<string>& param)
+{
 	if (param.size() != 3) {
 		LOG_PRINT("Fail - Invalid parameter size");
 		return -2;
@@ -19,7 +43,7 @@ int SSDWriter::execute(vector<string>& param, bool print2Console) {
 	}
 
 	if (data.length() != 10) {
-		LOG_PRINT("Fail - Invalid DATA format");
+		LOG_PRINT("Fail - Invalid DATA size");
 		return -2;
 	}
 
@@ -34,20 +58,5 @@ int SSDWriter::execute(vector<string>& param, bool print2Console) {
 			return -2;
 		}
 	}
-
-	string command = "ssd.exe W ";
-	command += lba;
-	command += " ";
-	command += data;
-
-	int ret = system(command.c_str());
-	if (ret != 0) {
-		return ret;
-	}
-
-	if (print2Console) {
-		cout << "[Write] Done" << endl;
-	}
-
-	return ret;
+	return 0;
 }

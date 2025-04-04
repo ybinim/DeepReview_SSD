@@ -10,6 +10,5 @@ class SSDFlusher : public SSDExecutor
 {
 public:
 	int execute(vector<string>& param, bool print2Console = true) override;
-
-private:
+	int checkParam(vector<string>& param) override;
 };

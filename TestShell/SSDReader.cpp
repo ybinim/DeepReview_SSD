@@ -5,9 +5,7 @@
 using namespace std;
 
 int SSDReader::execute(vector<string>& param, bool print2Console) {
-	int ret = 0;
-
-	ret = checkValidity(param);
+	int ret = checkParam(param);
 	if (ret !=0 ) {
 		return ret;
 	}
@@ -27,7 +25,7 @@ int SSDReader::execute(vector<string>& param, bool print2Console) {
 	return ret;
 }
 
-int SSDReader::checkValidity(vector<string>& param) {
+int SSDReader::checkParam(vector<string>& param) {
 	if (param.size() != 2) {
 		LOG_PRINT("Fail - Invalid parameter size");
 		return -2;
