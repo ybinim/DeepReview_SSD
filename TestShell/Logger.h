@@ -21,7 +21,7 @@ public:
     void openLogFile();
     void closeLogFile();
     void renameOldLogFile();
-    void renameOldLogToZip();
+    void compressedOldLog();
     string generateNewFileName();
     bool fileSizeExceedsLimit(const string& fileName);
 
