@@ -6,55 +6,54 @@ using namespace std;
 
 int TestShell::run(string command) {
     vector<string> param = parseCommand(command, ' ');
-    string command = param[0];
     int result = 0;
 
-    if (command.compare("exit") == 0) {
+    if (param[0].compare("exit") == 0) {
         LOG_PRINT("Exit");
         return 1;
     }
-    else if (command.compare("read") == 0) {
+    else if (param[0].compare("read") == 0) {
         result = reader->execute(param);
     }
-    else if (command.compare("write") == 0) {
+    else if (param[0].compare("write") == 0) {
         result = writer->execute(param);
     }
-    else if (command.compare("fullread") == 0) {
+    else if (param[0].compare("fullread") == 0) {
         if (param.size() != 1) {
             LOG_PRINT("Fail - Invalid parameter size");
             return -2;
         }
         result = runFullRead();
     }
-    else if (command.compare("fullwrite") == 0) {
+    else if (param[0].compare("fullwrite") == 0) {
         if (param.size() != 2) {
             LOG_PRINT("Fail - Invalid parameter size");
             return -2;
         }
         result = runFullWrite(param);
     }
-    else if ((command.compare("erase") == 0) || (command.compare("erase_range") == 0)) {
+    else if ((param[0].compare("erase") == 0) || (param[0].compare("erase_range") == 0)) {
         result = eraser->execute(param);
     }
-    else if (command.compare("flush") == 0) {
+    else if (param[0].compare("flush") == 0) {
         result = flusher->execute(param);
     }
-    else if (command.compare("help") == 0) {
+    else if (param[0].compare("help") == 0) {
         printHelp();
     }
-    else if ((command.compare("1_FullWriteAndReadCompare") == 0) || (command.compare("1_") == 0)) {
+    else if ((param[0].compare("1_FullWriteAndReadCompare") == 0) || (param[0].compare("1_") == 0)) {
         result = fullWriteAndReadCompare();
         printTestScriptResult(result);
     }
-    else if ((command.compare("2_PartialLBAWrite") == 0) || (command.compare("2_") == 0)) {
+    else if ((param[0].compare("2_PartialLBAWrite") == 0) || (param[0].compare("2_") == 0)) {
         result = partialLBAWrite();
         printTestScriptResult(result);
     }
-    else if ((command.compare("3_WriteReadAging") == 0) || (command.compare("3_") == 0)) {
+    else if ((param[0].compare("3_WriteReadAging") == 0) || (param[0].compare("3_") == 0)) {
         result = writeReadAging();
         printTestScriptResult(result);
     }
-    else if ((command.compare("4_EraseAndWriteAging") == 0) || (command.compare("4_") == 0)) {
+    else if ((param[0].compare("4_EraseAndWriteAging") == 0) || (param[0].compare("4_") == 0)) {
         result = eraseAndWriteAging();
         printTestScriptResult(result);
     }
@@ -81,7 +80,7 @@ int TestShell::runFullWrite(std::vector<std::string>& param)
 
         result = writer->execute(fullWriteParam, print2console);
         if (result != 0) {
-            break;
+            return result;
         }
 
         fullWriteParam.clear();
@@ -102,9 +101,10 @@ int TestShell::runFullRead(void)
 
         result = reader->execute(fullReadParam, false);
         if (result != 0) {
-            break;
+            return result;
         }
     }
+    cout << "[FullRead] Done" << endl;
     return result;
 }
 
