@@ -336,8 +336,8 @@ TEST_F(SSDFixture, CommandBufferTest_Overwrite)
 
 	EXPECT_EQ(std::filesystem::exists(nandFilePath), false);
 
-	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/1_W_0_0x12345678"), true);
-	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/2_W_1_0xBBBBBBBB"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/1_W_1_0xBBBBBBBB"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/2_W_0_0x12345678"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/3_empty"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/4_empty"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/5_empty"), true);
