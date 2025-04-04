@@ -284,9 +284,9 @@ TEST_F(SSDFixture, CommandBufferTest_Basic)
 
 	EXPECT_EQ(std::filesystem::exists(nandFilePath), false);
 
-	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/W 0 0xAAAAAAAA"), true);
-	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/W 1 0xBBBBBBBB"), true);
-	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/E 3 4"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/1_W_0_0xAAAAAAAA"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/2_W_1_0xBBBBBBBB"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/3_E_3_4"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/4_empty"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/5_empty"), true);
 }
@@ -318,7 +318,7 @@ TEST_F(SSDFixture, CommandBufferTest_FullBuffer)
 	getline(nandFile, data);
 	EXPECT_EQ(data, "6 0xDDDDDDDD");
 
-	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/W 10 0x10101010"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/1_W_10_0x10101010"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/2_empty"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/3_empty"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/4_empty"), true);
@@ -336,8 +336,8 @@ TEST_F(SSDFixture, CommandBufferTest_Overwrite)
 
 	EXPECT_EQ(std::filesystem::exists(nandFilePath), false);
 
-	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/W 0 0x12345678"), true);
-	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/W 1 0xBBBBBBBB"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/1_W_0_0x12345678"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/2_W_1_0xBBBBBBBB"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/3_empty"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/4_empty"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/5_empty"), true);
@@ -354,8 +354,8 @@ TEST_F(SSDFixture, CommandBufferTest_EraseAfterWrite1)
 
 	EXPECT_EQ(std::filesystem::exists(nandFilePath), false);
 
-	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/W 0 0xAAAAAAAA"), true);
-	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/E 1 3"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/1_W_0_0xAAAAAAAA"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/2_E_1_3"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/3_empty"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/4_empty"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/5_empty"), true);
@@ -372,7 +372,7 @@ TEST_F(SSDFixture, CommandBufferTest_EraseAfterWrite2)
 
 	EXPECT_EQ(std::filesystem::exists(nandFilePath), false);
 
-	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/E 0 10"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/1_E_0_10"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/2_empty"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/3_empty"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/4_empty"), true);
@@ -392,9 +392,9 @@ TEST_F(SSDFixture, CommandBufferTest_EraseWideRange)
 
 	EXPECT_EQ(std::filesystem::exists(nandFilePath), false);
 
-	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/W 0 0xAAAAAAAA"), true);
-	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/W 1 0xBBBBBBBB"), true);
-	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/E 3 7"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/1_W_0_0xAAAAAAAA"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/2_W_1_0xBBBBBBBB"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/3_E_3_7"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/4_empty"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/5_empty"), true);
 }
@@ -412,9 +412,9 @@ TEST_F(SSDFixture, CommandBufferTest_EraseNarrowRange)
 
 	EXPECT_EQ(std::filesystem::exists(nandFilePath), false);
 
-	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/W 0 0xAAAAAAAA"), true);
-	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/W 1 0xBBBBBBBB"), true);
-	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/E 3 4"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/1_W_0_0xAAAAAAAA"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/2_W_1_0xBBBBBBBB"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/3_E_3_4"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/4_empty"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/5_empty"), true);
 }
@@ -445,7 +445,7 @@ TEST_F(SSDFixture, CommandBufferTest_ReadFromCommandBuffer)
 	outputFile.close();
 	EXPECT_EQ(data, "0xCCCCCCCC");
 
-	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/W 0 0xCCCCCCCC"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/1_W_0_0xCCCCCCCC"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/2_empty"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/3_empty"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/4_empty"), true);
@@ -489,8 +489,8 @@ TEST_F(SSDFixture, CommandBufferTest_ReadFromCommandBuffer2)
 	outputFile.close();
 	EXPECT_EQ(data, "0xCCCCCCCC");
 
-	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/W 0 0xCCCCCCCC"), true);
-	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/E 1 10"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/1_W_0_0xCCCCCCCC"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/2_E_1_10"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/3_empty"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/4_empty"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/5_empty"), true);
@@ -516,10 +516,10 @@ TEST_F(SSDFixture, FlushTest)
 
 	EXPECT_EQ(std::filesystem::exists(nandFilePath), false);
 
-	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/W 0 0xAAAAAAAA"), true);
-	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/W 1 0xAAAAAAAA"), true);
-	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/W 2 0xAAAAAAAA"), true);
-	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/E 95 10"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/1_W_0_0xAAAAAAAA"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/2_W_1_0xAAAAAAAA"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/3_W_2_0xAAAAAAAA"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/4_E_95_10"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/5_empty"), true);
 
 	ret = mySsd.run("F");
