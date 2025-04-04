@@ -439,8 +439,10 @@ TEST_F(SSDFixture, CommandBufferTest_ReadFromCommandBuffer)
 	EXPECT_EQ(std::filesystem::exists(nandFilePath), true);
 	EXPECT_EQ(std::filesystem::exists(outputFilePath), true);
 	std::string data;
-	std::ifstream outputFile(outputFilePath.c_str());
+	std::ifstream outputFile;
+	outputFile.open(outputFilePath.c_str());
 	getline(outputFile, data);
+	outputFile.close();
 	EXPECT_EQ(data, "0xCCCCCCCC");
 
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/W 0 0xCCCCCCCC"), true);
@@ -448,4 +450,53 @@ TEST_F(SSDFixture, CommandBufferTest_ReadFromCommandBuffer)
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/3_empty"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/4_empty"), true);
 	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/5_empty"), true);
+
+	ret = mySsd.run("R 1");
+	EXPECT_EQ(ret, true);
+	outputFile.open(outputFilePath.c_str());
+	getline(outputFile, data);
+	outputFile.close();
+	EXPECT_EQ(data, "0xAAAAAAAA");
+}
+
+TEST_F(SSDFixture, CommandBufferTest_ReadFromCommandBuffer2)
+{
+	bool ret = mySsd.run("W 0 0xAAAAAAAA");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 1 0xAAAAAAAA");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 2 0xAAAAAAAA");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 3 0xAAAAAAAA");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 4 0xAAAAAAAA");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 0 0xCCCCCCCC");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("E 1 10");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("R 0");
+	EXPECT_EQ(ret, true);
+
+	EXPECT_EQ(std::filesystem::exists(nandFilePath), true);
+	EXPECT_EQ(std::filesystem::exists(outputFilePath), true);
+	std::string data;
+	std::ifstream outputFile;
+	outputFile.open(outputFilePath.c_str());
+	getline(outputFile, data);
+	outputFile.close();
+	EXPECT_EQ(data, "0xCCCCCCCC");
+
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/W 0 0xCCCCCCCC"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/E 1 10"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/3_empty"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/4_empty"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/5_empty"), true);
+
+	ret = mySsd.run("R 1");
+	EXPECT_EQ(ret, true);
+	outputFile.open(outputFilePath.c_str());
+	getline(outputFile, data);
+	outputFile.close();
+	EXPECT_EQ(data, "0x00000000");
 }
