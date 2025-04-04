@@ -53,6 +53,7 @@ int TestShell::run(string command) {
         printTestScriptResult(result);
     }
     else {
+        script_->execute(command);
         cout << "INVALID COMMAND" << endl;
         return -1;
     }
@@ -387,4 +388,9 @@ int TestShell::runSSDWriter(int lba, std::string& data, const int& numOfTimes, b
         }
     }
     return result;
+}
+
+void TestShell::setTestScript(std::shared_ptr<TestScript> script) {
+    script_ = script;  // TestScript 객체를 저장
+    std::cout << "TestScript 객체가 TestShell에 등록되었습니다." << std::endl;
 }

@@ -10,8 +10,8 @@
 #include <string>
 #include "TestScript.h"
 
-typedef TestScript* (*CreateTestScript)(); // DLL에서 TestScript 객체 생성 함수
-int prePareToUseTestScript(SSDExecutor* reader, SSDExecutor* writer, SSDExecutor* eraser, SSDExecutor* flusher);
+typedef TestScript* (*CreateTestScriptFunc)(); // DLL에서 TestScript 객체 생성 함수
+int prePareToUseTestScript(std::shared_ptr<TestShell> shell);
 
 #ifdef _DEBUG
 int main() {
@@ -27,8 +27,12 @@ int main(int argc, char* argv[]) {
 	SSDWriter writer;
 	SSDEraser eraser;
 	SSDFlusher flusher;
-	TestShell* shell = new TestShell(&reader, &writer, &eraser, &flusher);
-	prePareToUseTestScript(&reader, &writer, &eraser, &flusher);
+
+	//TestShell* shell = new TestShell(&reader, &writer, &eraser, &flusher);
+	// TestShell 객체를 std::shared_ptr로 생성
+	std::shared_ptr<TestShell> shell = std::make_shared<TestShell>(&reader, &writer, &eraser, &flusher);
+
+	prePareToUseTestScript(shell);
 
 	if (argc == 1) {
 		while (true) {
@@ -63,15 +67,15 @@ int main(int argc, char* argv[]) {
 	return -1;
 }
 
-int prePareToUseTestScript(SSDExecutor* reader, SSDExecutor* writer, SSDExecutor* eraser, SSDExecutor* flusher) {
+int prePareToUseTestScript(std::shared_ptr<TestShell> myShell) {
 	// DLL 로드
 	HMODULE hDLL = LoadLibrary(L"TestScript.dll");
 	if (!hDLL) {
 		std::cout << "DLL을 로드할 수 없습니다." << std::endl;
 		return -1;
 	}
-
-	CreateTestScript createTestScript = (CreateTestScript)GetProcAddress(hDLL, "CreateTestScript");
+	
+	CreateTestScriptFunc createTestScript = (CreateTestScriptFunc)GetProcAddress(hDLL, "CreateMyTestScript");
 	if (!createTestScript) {
 		std::cout << "CreateTestScript 함수를 찾을 수 없습니다." << std::endl;
 		FreeLibrary(hDLL);
@@ -86,18 +90,16 @@ int prePareToUseTestScript(SSDExecutor* reader, SSDExecutor* writer, SSDExecutor
 		return -1;
 	}
 
-	// 쉘 스크립트에 명령 추가
-	// TestShell 객체를 생성 (std::make_shared 사용)
-	std::shared_ptr<TestShell> testShell = std::make_shared<TestShell>(reader, writer, eraser, flusher);
+	// TestScript 객체를 TestShell에 등록
+	std::shared_ptr<TestScript> scriptPtr(script);
+	myShell->setTestScript(scriptPtr);  // TestScript 등록
 
-	script->addShell(testShell);
-
-	// 실행
-	script->execute();
+	script->addShell(myShell);
 
 	// DLL 언로드
 	//FreeLibrary(hDLL);
 
 	return 0;
 }
+
 #endif

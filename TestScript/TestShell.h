@@ -9,6 +9,7 @@
 #include <random>
 
 #include "SSDExecutor.h"
+//#include "TestScript.h"
 
 using namespace std;
 
@@ -18,6 +19,8 @@ public:
     TestShell(SSDExecutor* reader, SSDExecutor* writer, SSDExecutor* eraser, SSDExecutor* flusher)
         : reader(reader), writer(writer), eraser(eraser), flusher(flusher) {}
     int run(string command);
+    // TestScript 객체를 설정하는 함수
+    //void setTestScript(std::shared_ptr<TestScript> script);
 
     // TestScript 에서 호출하기 위해 public 으로 변경
     SSDExecutor* reader;
@@ -39,4 +42,6 @@ private:
     int eraseAndWriteAging();
     int runSSDEraser(int startLBA, const int endLBA, bool print2Console);
     int runSSDWriter(int lba, std::string& data, const int& numOfTimes, bool print2Console);
+
+    //std::shared_ptr<TestScript> script_;  // TestScript 객체를 저장
 };

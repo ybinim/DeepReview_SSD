@@ -1,4 +1,4 @@
-// TestScript.h
+ï»¿// TestScript.h
 #pragma once
 
 #ifdef TESTSCRIPT_EXPORTS
@@ -13,17 +13,24 @@
 #include <string>
 #include "TestShell.h"
 
+class TestShell;  // ìˆœí™˜ ì˜ì¡´ì„± ë°©ì§€
+
 class TESTSCRIPT_API TestScript {
 public:
-    TestScript();
+    //TestScript();
+    //~TestScript();
     void addShell(std::shared_ptr<TestShell> shell);
-    int execute();
+    int execute(string command);
     std::ifstream OpenScriptTxtFile(std::string scriptfilePath);
 
 private:
     std::shared_ptr<TestShell> shell_;
     const std::string scriptfilePath = "ShellScripts.txt";
+    int eraseAndWriteAging();
+    int runSSDEraser(int startLBA, int endLBA, bool print2Console);
+    int runSSDWriter(int lba, std::string& data, const int& numOfTimes, bool print2Console);
+    void printTestScriptResult(int result);
 };
 
-// DLL¿¡¼­ TestScript °´Ã¼ »ı¼º ÇÔ¼ö
-extern "C" TESTSCRIPT_API TestScript* createTestScript();
+// í•¨ìˆ˜ ì„ ì–¸ (DLL ë‚´ë³´ë‚´ê¸°)
+extern "C" __declspec(dllexport) TestScript* CreateMyTestScript();
