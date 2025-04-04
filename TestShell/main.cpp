@@ -10,7 +10,7 @@
 #include <string>
 #include "TestScript.h"
 
-typedef TestScript* (*CreateTestScriptFunc)(); // DLL에서 TestScript 객체 생성 함수
+typedef TestScript* (*CreateTestScript)(); // DLL에서 TestScript 객체 생성 함수
 int prePareToUseTestScript(SSDExecutor* reader, SSDExecutor* writer, SSDExecutor* eraser, SSDExecutor* flusher);
 
 #ifdef _DEBUG
@@ -71,7 +71,7 @@ int prePareToUseTestScript(SSDExecutor* reader, SSDExecutor* writer, SSDExecutor
 		return -1;
 	}
 
-	CreateTestScriptFunc createTestScript = (CreateTestScriptFunc)GetProcAddress(hDLL, "CreateTestScriptFunc");
+	CreateTestScript createTestScript = (CreateTestScript)GetProcAddress(hDLL, "CreateTestScript");
 	if (!createTestScript) {
 		std::cout << "CreateTestScript 함수를 찾을 수 없습니다." << std::endl;
 		FreeLibrary(hDLL);

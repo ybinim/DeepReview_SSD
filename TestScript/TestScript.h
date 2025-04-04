@@ -25,5 +25,6 @@ private:
     const std::string scriptfilePath = "ShellScripts.txt";
 };
 
-// DLL에서 TestScript 객체 생성 함수
-extern "C" TESTSCRIPT_API TestScript* createTestScript();
+extern "C" {
+    TESTSCRIPT_API TestScript* CreateTestScript();  // 내보낼 함수 선언
+}

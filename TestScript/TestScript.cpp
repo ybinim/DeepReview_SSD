@@ -1,11 +1,12 @@
 ﻿// ShellScript.cpp
 #include "TestScript.h"
-
+//#define TESTSCRIPT_EXPORTS 1
 TestScript::TestScript() {
     // 초기화 작업
 }
 
 void TestScript::addShell(std::shared_ptr<TestShell> shell) {
+    std::cout << "[addShell]" << std::endl;
     shell_ = shell;
 }
 
@@ -53,7 +54,7 @@ std::ifstream TestScript::OpenScriptTxtFile(std::string scriptfilePath) {
  //   inputFile.close();
 }
 
-// DLL에서 TestScript 객체를 생성하는 함수
-extern "C" TESTSCRIPT_API TestScript* createTestScript() {
-    return new TestScript();  // TestScript 객체 동적 생성
+// DLL에서 내보낼 함수
+TestScript* CreateTestScript() {
+    return new TestScript();
 }
