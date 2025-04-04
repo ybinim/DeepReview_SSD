@@ -252,12 +252,14 @@ bool SSD::updateCommandBuffer(string& command, int lba, string& param)
 						int newEnd = max(commandEnd, itEnd);
 						int newSize = newEnd - newlba + 1;
 
-						// update param
-						it->lba = newlba;
-						it->param = to_string(newSize);
+						if (newSize <= 10)
+						{
+							// update param
+							it->lba = newlba;
+							it->param = to_string(newSize);
+							skip = true;
+						}						
 					}
-
-					skip = true;
 					break;
 				}
 			}
