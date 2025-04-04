@@ -1,20 +1,15 @@
-#include <string>
-#include <iomanip>
-#include <fstream>
-#include <iostream>
+#include "Logger.h"
 
-using namespace std;
+const string Logger::logFileName = "latest.log";
+const size_t Logger::MAX_FILE_SIZE = 10*1024;  // 10 KB
 
-class Logger {
-public:
-    const string logFileName = "latest.log";
-    ofstream logFile;
+void Logger::print(const string& classFuncName, const string& message) {
+    time_t now = time(nullptr);
+    struct tm timeInfo;
+    char timeStr[100];
 
-    void print(const string& classFuncName, const string& message) {
-        time_t now = time(nullptr);
-        struct tm timeInfo;
-        char timeStr[100];
-
+    logFile.open(logFileName, std::ios::app);
+    if (logFile.is_open()) {
         localtime_s(&timeInfo, &now);
         strftime(timeStr, sizeof(timeStr), "%y.%m.%d %H:%M", &timeInfo);
 
@@ -27,6 +22,9 @@ public:
 
         cout << "[" << timeStr << "] " << classStr << "." << functionStr << std::setw(30) << std::left << "()"
             << ": " << message << endl;
-     
+
+        logFile << "[" << timeStr << "] " << classStr << "." << functionStr << std::setw(30) << std::left << "()"
+            << ": " << message << endl;
     }
-};
+    logFile.close();
+}

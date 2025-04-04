@@ -9,6 +9,7 @@
 #include <random>
 
 #include "SSDExecutor.h"
+#include "Logger.h"
 
 using namespace std;
 

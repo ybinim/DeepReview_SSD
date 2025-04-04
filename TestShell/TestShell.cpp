@@ -1,13 +1,12 @@
 ﻿#include "TestShell.h"
-#include "Logger.cpp"
+
 using namespace std;
 
 int TestShell::run(string command) {
     vector<string> param = parseCommand(command, ' ');
     int result = 0;
 
-    Logger logger;
-    logger.print(__FUNCTION__, "Test");
+    LOG_PRINT("Log Test");
 
     if (param[0].compare("exit") == 0) {
         return 1;
