@@ -19,8 +19,8 @@ public:
 	bool run(std::string input);
 
 private:
-	bool isInvalidCommand(std::string& command);
-	bool isInvalidParam(std::string& paramStr, int min, int max);
+	bool IsInvalidLBA(string lbaStr);
+	bool isInvalidParam(vector<string>& param);
 	void readFileAndUpdateMap(std::map<int, std::string>& map);
 	void loadCommandBuffer();
 	bool flushCommandBuffer();
