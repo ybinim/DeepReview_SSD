@@ -32,9 +32,9 @@ private:
     Logger(const Logger&) = delete;
     Logger& operator=(const Logger&) = delete;
 
-    static const string logFolder;
-    static const string logFileName;
-    static const string fullFileName;
-    static const size_t MAX_FILE_SIZE;
+    const string logFolder = "log";
+    const string logFileName = "latest.log";
+    const string fullFileName = logFolder + "/" + logFileName;
+    const size_t MAX_FILE_SIZE = 10 * 1024;  // 10 KB
     ofstream logFile;
 };

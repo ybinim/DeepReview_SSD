@@ -1,18 +1,10 @@
 #include "Logger.h"
     
-const string Logger::logFolder = "log";
-const string Logger::logFileName = "latest.log";
-const string Logger::fullFileName = logFolder + "/" + logFileName;
-
-const size_t Logger::MAX_FILE_SIZE = 10*1024;  // 10 KB
-
 void Logger::openLogFile() {
     if (filesystem::exists(logFolder) == false) {
         // create directory and empty files
         filesystem::create_directory(logFolder);
     }
-
-    //string fullFileName = logFolder + "/" + logFileName;
 
     if (fileSizeExceedsLimit(fullFileName)) {
         renameOldLogFile();
