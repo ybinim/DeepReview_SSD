@@ -149,6 +149,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="erase.h" />
+    <ClInclude Include="nand.h" />
     <ClInclude Include="read.h" />
     <ClInclude Include="ssd.h" />
     <ClInclude Include="write.h" />
