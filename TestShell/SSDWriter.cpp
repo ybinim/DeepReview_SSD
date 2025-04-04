@@ -37,7 +37,7 @@ int SSDWriter::checkParam(vector<string>& param)
 	string lba = param[1];
 	string data = param[2];
 
-	if (lba.length() > 2 || isNumber(lba) == false) {
+	if (isValidLba(lba) == false) {
 		LOG_PRINT("Fail - Invalid LBA format");
 		return -2;
 	}

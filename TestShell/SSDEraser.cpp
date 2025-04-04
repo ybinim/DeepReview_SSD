@@ -37,7 +37,7 @@ int SSDEraser::checkParam(vector<string>& param)
 	}
 
 	if (param[0].compare("erase") == 0) {
-		if (param[1].length() > 2 || isNumber(param[1]) == false) {
+		if (isValidLba(param[1]) == false) {
 			LOG_PRINT("Fail - Invalid LBA format");
 			return -2;
 		}
@@ -47,11 +47,11 @@ int SSDEraser::checkParam(vector<string>& param)
 		}
 	}
 	else if (param[0].compare("erase_range") == 0) {
-		if (param[1].length() > 2 || isNumber(param[1]) == false) {
+		if (isValidLba(param[1]) == false) {
 			LOG_PRINT("Fail - Invalid Start_LBA format");
 			return -2;
 		}
-		if (param[2].length() > 2 || isNumber(param[2]) == false) {
+		if (isValidLba(param[2]) == false) {
 			LOG_PRINT("Fail - Invalid End_LBA format");
 			return -2;
 		}
