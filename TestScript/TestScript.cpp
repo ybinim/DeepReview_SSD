@@ -12,9 +12,6 @@ void TestScript::addShell(std::shared_ptr<TestShell> shell) {
 
 int TestScript::execute() {
     std::cout << "[Executing Shell Script]" << std::endl;
-    //for (const auto& cmd : commands) {
-    //    cmd->execute();
-    //}
 
     std::ifstream inputFile = OpenScriptTxtFile("ShellScripts.txt");
     int result = 0;

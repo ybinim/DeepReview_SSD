@@ -89,12 +89,11 @@ int prePareToUseTestScript(SSDExecutor* reader, SSDExecutor* writer, SSDExecutor
 	// 쉘 스크립트에 명령 추가
 	// TestShell 객체를 생성 (std::make_shared 사용)
 	std::shared_ptr<TestShell> testShell = std::make_shared<TestShell>(reader, writer, eraser, flusher);
-	// TestShell 객체를 TestScript에 추가
+
 	script->addShell(testShell);
-	//script->addShell(std::make_shared<TestShell>(reader, writer, eraser, flusher));
 
 	// 실행
-	//script->execute();
+	script->execute();
 
 	// DLL 언로드
 	//FreeLibrary(hDLL);
