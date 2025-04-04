@@ -230,7 +230,7 @@ bool SSD::updateCommandBuffer(string& command, int lba, string& param)
 			}
 			else if (it->command == "E") {
 				int elememtSize = stoi(it->param);
-				
+
 				if ((it->lba >= lba) && (it->lba + elememtSize <= lba + size)) {
 					// erase wide range -> remove narrow one 
 					it = vector<bufferElement>::reverse_iterator(commandBuffer.erase((++it).base()));
@@ -238,6 +238,25 @@ bool SSD::updateCommandBuffer(string& command, int lba, string& param)
 				}
 				else if ((it->lba <= lba) && (it->lba + elememtSize >= lba + size)) {
 					// erase narrow range -> no need to update command buffer
+					skip = true;
+					break;
+				}
+				else if (it == commandBuffer.rbegin()) // Erase Command 가 연속적으로 2회 들어왔을때
+				{
+					int commandEnd = lba + size - 1;
+					int itEnd = it->lba + elememtSize - 1;
+					// merge range
+					if (!(itEnd < lba || it->lba > commandEnd))
+					{
+						int newlba = min(it->lba, lba);
+						int newEnd = max(commandEnd, itEnd);
+						int newSize = newEnd - newlba + 1;
+
+						// update param
+						it->lba = newlba;
+						it->param = to_string(newSize);
+					}
+
 					skip = true;
 					break;
 				}
