@@ -1,15 +1,25 @@
 #include "Logger.h"
     
+const string Logger::logFolder = "log";
 const string Logger::logFileName = "latest.log";
+const string Logger::fullFileName = logFolder + "/" + logFileName;
+
 const size_t Logger::MAX_FILE_SIZE = 10*1024;  // 10 KB
 
 void Logger::openLogFile() {
-    if (fileSizeExceedsLimit(logFileName)) {
+    if (filesystem::exists(logFolder) == false) {
+        // create directory and empty files
+        filesystem::create_directory(logFolder);
+    }
+
+    //string fullFileName = logFolder + "/" + logFileName;
+
+    if (fileSizeExceedsLimit(fullFileName)) {
         renameOldLogFile();
-        logFile.open(logFileName, std::ios::app);
+        logFile.open(fullFileName, std::ios::app);
     }
     else {
-        logFile.open(logFileName, std::ios::app);
+        logFile.open(fullFileName, std::ios::app);
     }
 
     if (!logFile.is_open()) {
@@ -24,16 +34,16 @@ void Logger::closeLogFile() {
 }
 
 void Logger::renameOldLogFile() {
-    if (filesystem::exists(logFileName)) {
-        string newFileName = generateNewFileName();
-        filesystem::rename(logFileName, newFileName);
+    if (filesystem::exists(fullFileName)) {
+        string newFileName = logFolder + "/" + generateNewFileName();
+        filesystem::rename(fullFileName, newFileName);
     }
 }
 
 void Logger::renameOldLogToZip() {
     vector<filesystem::directory_entry> logFiles;
-    for (const auto& entry : filesystem::directory_iterator(".")) {
-        if (entry.is_regular_file() && entry.path().filename().string().find("until_") == 0) {
+    for (const auto& entry : filesystem::directory_iterator(logFolder)) {
+        if (entry.is_regular_file() && entry.path().filename().string().find("until_") == 0 && entry.path().extension() == ".log") {
             logFiles.push_back(entry);
         }
     }
