@@ -4,6 +4,9 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <vector>
+#include <filesystem>
+#include <sstream>
 
 using namespace std;
 
@@ -15,6 +18,12 @@ public:
         static Logger instance;
         return instance;
     }
+    void openLogFile();
+    void closeLogFile();
+    void renameOldLogFile();
+    void renameOldLogToZip();
+    string generateNewFileName();
+    bool fileSizeExceedsLimit(const string& fileName);
 
     void print(const string& classFuncName, const string& message);
 
