@@ -1,5 +1,7 @@
 ﻿#include "TestShell.h"
 
+#define SSD_OUTPUT_FILEPATH ("ssd_output.txt")
+
 using namespace std;
 
 int TestShell::run(string command) {
@@ -88,19 +90,18 @@ int TestShell::runFullWrite(std::vector<std::string>& param)
 
 int TestShell::runFullRead(void)
 {
+    bool print2console = false;
     int result = 0;
-    vector<string> fullReadParam = {};
+    vector<string> fullReadParam = { "read", "-1"};
+    string data = "";
 
     for (int i = 0; i < 100; i++) {
-        fullReadParam.push_back("read");
-        fullReadParam.push_back(to_string(i));
+        fullReadParam[1] = to_string(i);
 
-        result = reader->execute(fullReadParam);
+        result = reader->execute(fullReadParam, false);
         if (result != 0) {
             break;
         }
-
-        fullReadParam.clear();
     }
     return result;
 }
@@ -317,13 +318,14 @@ int TestShell::writeReadAging() {
 
 int TestShell::readCompare(string& expected) {
     ifstream file;
-    file.open("ssd_output.txt");
+    file.open(SSD_OUTPUT_FILEPATH);
     if (file.is_open()) {
         string actual = "";
         getline(file, actual);
         if (expected.compare(actual) == 0) {
             return 0;
         }
+        file.close();
     }
     return -1;
 }

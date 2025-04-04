@@ -18,7 +18,7 @@ int SSDEraser::execute(vector<string>& param, bool print2Console) {
 		size = stoi(param[2]) - stoi(param[1]) + 1;
 	}
 	
-	int ret = erase(lba, size);
+	ret = erase(lba, size);
 	if (ret != 0) {
 		return ret;
 	}

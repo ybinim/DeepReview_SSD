@@ -19,8 +19,9 @@ int SSDReader::execute(vector<string>& param, bool print2Console) {
 		return ret;
 	}
 
-	if (print2Console)
+	if (print2Console) {
 		print2console(lba);
+	}
 
 	return ret;
 }
@@ -45,6 +46,7 @@ void SSDReader::print2console(string lba) {
 	ifstream outputFile(outputFilePath.c_str());
 	string data = "";
 	getline(outputFile, data);
+	outputFile.close();
 
 	cout << "[Read] LBA " << lba << " : " << data << endl;
 }
