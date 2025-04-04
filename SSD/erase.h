@@ -3,7 +3,7 @@
 
 #include "nand.h"
 
-class EraseSSD : NANDFileHandler {
+class EraseSSD : public NANDFileHandler {
 public:
     bool execute(std::map<int, std::string>& nand, int lba, const std::string& size);
 
