@@ -475,6 +475,8 @@ TEST_F(SSDFixture, CommandBufferTest_ReadFromCommandBuffer2)
 	EXPECT_EQ(ret, true);
 	ret = mySsd.run("E 1 10");
 	EXPECT_EQ(ret, true);
+	ret = mySsd.run("E 2 11");
+	EXPECT_EQ(ret, false);
 	ret = mySsd.run("R 0");
 	EXPECT_EQ(ret, true);
 
