@@ -10,7 +10,7 @@ class SSDReader : public SSDExecutor
 {
 public:
 	int execute(vector<string>& param, bool print2Console = true) override;
-	int checkValidity(vector<string>& param);
+	int checkParam(vector<string>& param) override;
 	void print2console(string lba);
 
 private:

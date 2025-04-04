@@ -4,16 +4,40 @@
 #define SSD_ERASE_SIZE_LIMIT (10)
 
 int SSDEraser::execute(vector<string>& param, bool print2Console) {
+	int ret = checkParam(param);
+	if (ret != 0) {
+		return ret;
+	}
+
+	int lba = stoi(param[1]);
+	int size;
+	if (param[0].compare("erase") == 0) {
+		size = stoi(param[2]);
+	}
+	else {
+		size = stoi(param[2]) - stoi(param[1]) + 1;
+	}
+	
+	ret = erase(lba, size);
+	if (ret != 0) {
+		return ret;
+	}
+
+	if (print2Console) {
+		std::cout << "[" << param[0] << "] Done" << std::endl;
+	}
+	return ret;
+}
+
+int SSDEraser::checkParam(vector<string>& param)
+{
 	if (param.size() != 3) {
 		LOG_PRINT("Fail - Invalid parameter size");
 		return -2;
 	}
 
-	int lba = 0;
-	int size = 0;
-
 	if (param[0].compare("erase") == 0) {
-		if (param[1].length() > 2 || isNumber(param[1]) == false) {
+		if (isValidLba(param[1]) == false) {
 			LOG_PRINT("Fail - Invalid LBA format");
 			return -2;
 		}
@@ -21,32 +45,23 @@ int SSDEraser::execute(vector<string>& param, bool print2Console) {
 			LOG_PRINT("Fail - Invalid SIZE format");
 			return -2;
 		}
-
-		lba = stoi(param[1]);
-		size = stoi(param[2]);
 	}
 	else if (param[0].compare("erase_range") == 0) {
-		if (param[1].length() > 2 || isNumber(param[1]) == false) {
+		if (isValidLba(param[1]) == false) {
 			LOG_PRINT("Fail - Invalid Start_LBA format");
 			return -2;
 		}
-		if (param[2].length() > 2 || isNumber(param[2]) == false) {
+		if (isValidLba(param[2]) == false) {
 			LOG_PRINT("Fail - Invalid End_LBA format");
 			return -2;
 		}
 
-		lba = stoi(param[1]);
-		size = stoi(param[2]) - lba + 1;
-		if (size < 0) {
+		if ((stoi(param[2]) - stoi(param[1]) + 1) < 0) {
+			LOG_PRINT("Fail - Invalid range");
 			return -2;
 		}
 	}
-	
-	int ret = erase(lba, size);
-	if (print2Console) {
-		std::cout << "[" << param[0] << "] Done" << std::endl;
-	}
-	return ret;
+	return 0;
 }
 
 int SSDEraser::erase(int lba, int size) {

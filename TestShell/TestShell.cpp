@@ -1,5 +1,7 @@
 ﻿#include "TestShell.h"
 
+#define SSD_OUTPUT_FILEPATH ("ssd_output.txt")
+
 using namespace std;
 
 int TestShell::run(string command) {
@@ -56,7 +58,7 @@ int TestShell::run(string command) {
         printTestScriptResult(result);
     }
     else {
-        LOG_PRINT("Fail - Invalid command (" + param[0] + ")");
+        LOG_PRINT("Fail - Invalid command (" + command + ")");
         cout << "INVALID COMMAND" << endl;
         return -1;
     }
@@ -78,30 +80,31 @@ int TestShell::runFullWrite(std::vector<std::string>& param)
 
         result = writer->execute(fullWriteParam, print2console);
         if (result != 0) {
-            break;
+            return result;
         }
 
         fullWriteParam.clear();
     }
+    cout << "[FullWrite] Done" << endl;
     return result;
 }
 
 int TestShell::runFullRead(void)
 {
+    bool print2console = false;
     int result = 0;
-    vector<string> fullReadParam = {};
+    vector<string> fullReadParam = { "read", "-1"};
+    string data = "";
 
     for (int i = 0; i < 100; i++) {
-        fullReadParam.push_back("read");
-        fullReadParam.push_back(to_string(i));
+        fullReadParam[1] = to_string(i);
 
-        result = reader->execute(fullReadParam);
+        result = reader->execute(fullReadParam, false);
         if (result != 0) {
-            break;
+            return result;
         }
-
-        fullReadParam.clear();
     }
+    cout << "[FullRead] Done" << endl;
     return result;
 }
 
@@ -180,13 +183,13 @@ int TestShell::fullWriteAndReadCompare() {
     vector<string> readParam;
     int result = 0;
     int lba = 0;
-    int loopcount = 5;
+    const int loopSize = 5;
 
     while (lba < 100)
     {
         expectedData += to_string(data);
         data += 16;
-        for (int writecount = 0; writecount < loopcount; writecount++)
+        for (int writecount = 0; writecount < loopSize; writecount++)
         {
             writeParam.push_back("write");
             writeParam.push_back(to_string(lba++));
@@ -199,8 +202,8 @@ int TestShell::fullWriteAndReadCompare() {
             writeParam.clear();
         }
 
-        lba = lba - loopcount;
-        for (int comparecount = 0; comparecount < loopcount; comparecount++)
+        lba = lba - loopSize;
+        for (int comparecount = 0; comparecount < loopSize; comparecount++)
         {
             readParam.push_back("read");
             readParam.push_back(to_string(lba++));
@@ -266,49 +269,45 @@ int TestShell::partialLBAWrite() {
 int TestShell::writeReadAging() {
     bool print2Console = false;
     int result = 0;
-    int idx = 0;
     vector<string> lbaList = { "0", "99" };
     vector<string> testParam = {};
     vector<string> dataValue = {};
+    int dataValueIdx = 0;
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<unsigned int> dis(0x0, 0xFFFFFFFF);
     unsigned int randValue;
 
     for (int count = 0; count < 200; count++) {
-        idx = 0;
+        dataValueIdx = 0;
         for (const string& lba : lbaList) {
             std::stringstream ss;
             randValue = dis(gen);
             ss << "0x" << std::setw(8) << std::setfill('0') << std::hex << std::uppercase << randValue;
-            //std::cout << "Random Value : " << ss.str() << "\n";
 
             dataValue.push_back(ss.str());
             testParam.push_back("write");
             testParam.push_back(lba);
-            testParam.push_back(dataValue[idx++]);
+            testParam.push_back(dataValue[dataValueIdx++]);
             result = writer->execute(testParam, print2Console);
             if (result != 0) {
-                //break;
                 return 1;
             }
             testParam.clear();
         }
 
-        idx = 0;
+        dataValueIdx = 0;
         for (const string& lba : lbaList) {
             testParam.push_back("read");
             testParam.push_back(lba);
 
             result = reader->execute(testParam, print2Console);
             if (result != 0) {
-                //break;
                 return 1;
             }
 
-            result = readCompare(dataValue[idx++]);
+            result = readCompare(dataValue[dataValueIdx++]);
             if (result != 0) {
-                //break;
                 return 1;
             }
             testParam.clear();
@@ -321,13 +320,14 @@ int TestShell::writeReadAging() {
 
 int TestShell::readCompare(string& expected) {
     ifstream file;
-    file.open("ssd_output.txt");
+    file.open(SSD_OUTPUT_FILEPATH);
     if (file.is_open()) {
         string actual = "";
         getline(file, actual);
         if (expected.compare(actual) == 0) {
             return 0;
         }
+        file.close();
     }
     return -1;
 }
@@ -366,7 +366,6 @@ int TestShell::eraseAndWriteAging() {
 
 int TestShell::runSSDEraser(int startLBA, int endLBA, bool print2Console)
 {
-    int result = 0;
     vector<string> eraseParam;
 
     if (endLBA >= 100) {
@@ -375,8 +374,7 @@ int TestShell::runSSDEraser(int startLBA, int endLBA, bool print2Console)
     eraseParam.push_back("erase_range");
     eraseParam.push_back(std::to_string(startLBA));
     eraseParam.push_back(std::to_string(endLBA));
-    result = eraser->execute(eraseParam, print2Console);
-    return result;
+    return eraser->execute(eraseParam, print2Console);
 }
 
 int TestShell::runSSDWriter(int lba, std::string& data, const int& numOfTimes, bool print2Console)

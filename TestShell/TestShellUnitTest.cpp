@@ -17,6 +17,20 @@ class MockReader : public SSDExecutor
 {
 public:
 	int execute(vector<string>& param, bool print2Console = true) override {
+		if (checkParam(param) != 0) {
+			return -2;
+		}
+
+		outputText = "0x00000000";
+		auto it = nandText.find(stoi(param[1]));
+		if (it != nandText.end()) {
+			outputText = it->second;
+		}
+
+		return 0;
+	}
+
+	int checkParam(vector<string>& param) override {
 		if (param.size() != 2) {
 			return -2;
 		}
@@ -25,13 +39,6 @@ public:
 		if (lba.length() > 2 || isNumber(lba) == false) {
 			return -2;
 		}
-
-		outputText = "0x00000000";
-		auto it = nandText.find(stoi(lba));
-		if (it != nandText.end()) {
-			outputText = it->second;
-		}
-
 		return 0;
 	}
 };
@@ -40,6 +47,24 @@ class MockWriter : public SSDExecutor
 {
 public:
 	int execute(vector<string>& param, bool print2Console = true) override {
+		if (checkParam(param) != 0) {
+			return -2;
+		}
+
+		string lba = param[1];
+		string data = param[2];
+
+		auto it = nandText.find(stoi(lba));
+		if (it != nandText.end()) {
+			it->second = data;
+		}
+		else {
+			nandText.emplace(stoi(lba), data);
+		}
+		return 0;
+	}
+
+	int checkParam(vector<string>& param) override {
 		if (param.size() != 3) {
 			return -2;
 		}
@@ -64,14 +89,6 @@ public:
 				return -2;
 			}
 		}
-
-		auto it = nandText.find(stoi(lba));
-		if (it != nandText.end()) {
-			it->second = data;
-		}
-		else {
-			nandText.emplace(stoi(lba), data);
-		}
 		return 0;
 	}
 };
@@ -80,6 +97,24 @@ class MockEraser : public SSDExecutor
 {
 public:
 	int execute(vector<string>& param, bool print2Console) override {
+		if (checkParam(param) != 0) {
+			return -2;
+		}
+
+		int lba = stoi(param[1]);
+		int size;
+		if (param[0].compare("erase") == 0) {
+			size = stoi(param[2]);
+		}
+		else {
+			size = stoi(param[2]) - stoi(param[1]) + 1;
+		}
+
+		int ret = erase(lba, size);
+		return ret;
+	}
+
+	int checkParam(vector<string>& param) override {
 		if (param.size() != 3) {
 			return -2;
 		}
@@ -113,8 +148,7 @@ public:
 			}
 		}
 
-		int ret = erase(lba, size);
-		return ret;
+		return 0;
 	}
 
 	int erase(int lba, int size) {
@@ -131,7 +165,14 @@ class MockFlusher : public SSDExecutor
 {
 public:
 	int execute(vector<string>& param, bool print2Console = true) override {
-		if(param.size() != 1) {
+		if (checkParam(param) != 0) {
+			return -2;
+		}
+		return 0;
+	}
+
+	int checkParam(vector<string>& param) override {
+		if (param.size() != 1) {
 			return -2;
 		}
 
