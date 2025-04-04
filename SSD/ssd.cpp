@@ -252,6 +252,8 @@ bool SSD::updateCommandBuffer(string& command, int lba, string& param)
 
 	clearCommandBufferFiles();
 	createCommandBufferFiles();
+
+	return true;
 }
 
 void SSD::clearCommandBufferFiles() {
