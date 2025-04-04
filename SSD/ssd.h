@@ -6,6 +6,8 @@
 #include "read.h"
 #include "erase.h"
 
+using namespace std;
+
 struct bufferElement {
 	std::string command;
 	int lba;
@@ -26,6 +28,7 @@ private:
 	bool updateCommandBuffer(std::string& command, int lba, std::string& param);
 	void clearCommandBufferFiles();
 	void createCommandBufferFiles();
+	vector<string> parseString(string& str, char delimiter);
 
 	WriteSSD myWrite;
 	ReadSSD myRead;

@@ -133,9 +133,18 @@ void SSD::loadCommandBuffer() {
 			continue;
 		}
 
-		stringstream commandStream(fileName);
-		string command, lba, param;
-		commandStream >> command >> lba >> param;
+		vector<string> temp_param = parseString(fileName, '_');
+		string command = temp_param[1];
+		string lba = temp_param[2];
+
+		string param = "";
+		auto it = temp_param.begin();
+		it = it + 3;
+		while (it != temp_param.end()) {
+			param += *it;
+			it++;
+		}
+
 		commandBuffer.push_back({ command, stoi(lba), param });
 	}
 }
@@ -198,15 +207,15 @@ bool SSD::updateCommandBuffer(string& command, int lba, string& param)
 {
 	bool erased;
 	bool skip = false;
-	auto it = commandBuffer.begin();
+	auto it = commandBuffer.rbegin();
 
-	while (it != commandBuffer.end()) {
+	while (it != commandBuffer.rend()) {
 		erased = false;
 		if (command == "W") {
 			if ((it->command == "W") && (it->lba == lba)) {
-				// write to same LBA -> overwrite
-				it->param = param;
-				skip = true;
+				// write to same LBA -> remove & push back to manage command order
+				it = vector<bufferElement>::reverse_iterator(commandBuffer.erase((++it).base()));
+				erased = true;
 				break;
 			}
 		}
@@ -215,21 +224,42 @@ bool SSD::updateCommandBuffer(string& command, int lba, string& param)
 			if (it->command == "W") {
 				if ((it->lba >= lba) && (it->lba < lba + size)) {
 					// erase after write -> remove write
-					it = commandBuffer.erase(it);
+					it = vector<bufferElement>::reverse_iterator(commandBuffer.erase((++it).base()));
 					erased = true;
 				}
 			}
 			else if (it->command == "E") {
 				int elememtSize = stoi(it->param);
-				
+
 				if ((it->lba >= lba) && (it->lba + elememtSize <= lba + size)) {
 					// erase wide range -> remove narrow one 
-					it = commandBuffer.erase(it);
+					it = vector<bufferElement>::reverse_iterator(commandBuffer.erase((++it).base()));
 					erased = true;
 				}
 				else if ((it->lba <= lba) && (it->lba + elememtSize >= lba + size)) {
 					// erase narrow range -> no need to update command buffer
 					skip = true;
+					break;
+				}
+				else if (it == commandBuffer.rbegin()) // Erase Command 가 연속적으로 2회 들어왔을때
+				{
+					int commandEnd = lba + size - 1;
+					int itEnd = it->lba + elememtSize - 1;
+					// merge range
+					if (!(itEnd < lba || it->lba > commandEnd))
+					{
+						int newlba = min(it->lba, lba);
+						int newEnd = max(commandEnd, itEnd);
+						int newSize = newEnd - newlba + 1;
+
+						if (newSize <= 10)
+						{
+							// update param
+							it->lba = newlba;
+							it->param = to_string(newSize);
+							skip = true;
+						}						
+					}
 					break;
 				}
 			}
@@ -263,7 +293,7 @@ void SSD::createCommandBufferFiles() {
 	int count = 1;
 	ofstream file;
 	for (bufferElement& element : commandBuffer) {
-		file.open(bufferDirPath + "/" + element.command + " " + to_string(element.lba) + " " + element.param);
+		file.open(bufferDirPath + "/" + to_string(count) + "_" + element.command + "_" + to_string(element.lba) + "_" + element.param);
 		file.close();
 		count++;
 	}
@@ -272,4 +302,16 @@ void SSD::createCommandBufferFiles() {
 		file.close();
 		count++;
 	}
+}
+
+vector<string> SSD::parseString(string& str, char delimiter) {
+	string subParam = "";
+	vector<string> result = {};
+	istringstream commandStream(str);
+
+	while (getline(commandStream, subParam, delimiter)) {
+		result.push_back(subParam);
+	}
+
+	return result;
 }
