@@ -117,7 +117,7 @@ bool SSD::isInvalidParam(vector<string>& param) {
 			}
 
 			string dataStr = param[2];
-			if (dataStr.length() > 10) {
+			if (dataStr.length() != 10) {
 				return true;
 			}
 
