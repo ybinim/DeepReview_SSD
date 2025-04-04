@@ -17,13 +17,17 @@ bool SSD::run(string input) {
 	string commandStr, lbaStr, dataStr;
 	inputStream >> commandStr >> lbaStr >> dataStr;
 
-	if (isInvalidCommand(commandStr))
-	{
+	if (isInvalidCommand(commandStr)) {
 		return false;
 	}
 
-	if ((commandStr != "F") && isInvalidLBA(lbaStr))
-	{
+	if ((commandStr != "F") && isInvalidParam(lbaStr, 0, 99)) {
+		ofstream outputFile(outputfilePath, ios::trunc);
+		outputFile << "ERROR";
+		return false;
+	}
+
+	if ((commandStr == "E") && isInvalidParam(dataStr, 0, 10)) {
 		ofstream outputFile(outputfilePath, ios::trunc);
 		outputFile << "ERROR";
 		return false;
@@ -71,14 +75,14 @@ bool SSD::isInvalidCommand(string& command) {
 
 }
 
-bool SSD::isInvalidLBA(string& lbaStr) {
-	int lba = 0;
+bool SSD::isInvalidParam(string& paramStr, int min, int max) {
+	int param = 0;
 	bool ret = false;
 
 	try {
-		lba = stoi(lbaStr);
+		param = stoi(paramStr);
 
-		if (lba < 0 || lba >= 100) {
+		if (param < min || param > max) {
 			ret = true;
 		}
 	}
@@ -120,19 +124,18 @@ void SSD::loadCommandBuffer() {
 		return;
 	}
 
+	commandBuffer.clear();
+
 	for (const auto& file : filesystem::directory_iterator(bufferDirPath)) {
 		string fileName = file.path().filename().string();
 
 		if (fileName.substr(1).compare("_empty") == 0) {
-			cout << "empty file exists: " << fileName << endl;
 			continue;
 		}
 
 		stringstream commandStream(fileName);
 		string command, lba, param;
 		commandStream >> command >> lba >> param;
-
-		cout << "push back to commandBuffer - " << command << " " << lba << " " << param << endl;
 		commandBuffer.push_back({ command, stoi(lba), param });
 	}
 }
@@ -147,11 +150,9 @@ bool SSD::flushCommandBuffer() {
 
 	for (const bufferElement& element : commandBuffer) {
 		if (element.command == "W") {
-			cout << "flush W " << element.lba << element.param << endl;
 			ret = myWrite.execute(ssdMap, element.lba, element.param);
 		}
 		else if (element.command == "E") {
-			cout << "flush E " << element.lba << element.param << endl;
 			ret = myErase.execute(ssdMap, element.lba, element.param);
 		}
 		else {
@@ -173,7 +174,6 @@ bool SSD::searchInCommandBuffer(int lba) {
 	for (const bufferElement& element : commandBuffer) {
 		if (element.command == "W") {
 			if (element.lba == lba) {
-				cout << "found in W" << endl;
 				ofstream outputFile(outputfilePath, ios::trunc);
 				outputFile << element.param;
 				outputFile.close();
@@ -183,7 +183,6 @@ bool SSD::searchInCommandBuffer(int lba) {
 		else if (element.command == "E") {
 			int size = stoi(element.param);
 			if ((lba >= element.lba) && (lba < element.lba + size)) {
-				cout << "found in E" << endl;
 				ofstream outputFile(outputfilePath, ios::trunc);
 				outputFile << "0x00000000";
 				outputFile.close();
@@ -197,7 +196,6 @@ bool SSD::searchInCommandBuffer(int lba) {
 
 bool SSD::updateCommandBuffer(string& command, int lba, string& param)
 {
-	bool ret = true;
 	bool erased;
 	bool skip = false;
 	auto it = commandBuffer.begin();
@@ -224,12 +222,12 @@ bool SSD::updateCommandBuffer(string& command, int lba, string& param)
 			else if (it->command == "E") {
 				int elememtSize = stoi(it->param);
 				
-				if ((it->lba >= lba) && (it->lba + size <= lba + size)) {
+				if ((it->lba >= lba) && (it->lba + elememtSize <= lba + size)) {
 					// erase wide range -> remove narrow one 
 					it = commandBuffer.erase(it);
 					erased = true;
 				}
-				else if ((it->lba <= lba) && (it->lba + size >= lba + size)) {
+				else if ((it->lba <= lba) && (it->lba + elememtSize >= lba + size)) {
 					// erase narrow range -> no need to update command buffer
 					skip = true;
 					break;
@@ -246,12 +244,13 @@ bool SSD::updateCommandBuffer(string& command, int lba, string& param)
 		commandBuffer.push_back({ command, lba, param });
 	}
 
-	for (bufferElement& element : commandBuffer) {
-		cout << "command buffer - " << element.command << element.lba << element.param << endl;
-	}
+	//for (bufferElement& element : commandBuffer) {
+	//	cout << "command buffer after - " << element.command << element.lba << element.param << endl;
+	//}
 
 	clearCommandBufferFiles();
 	createCommandBufferFiles();
+	return true;
 }
 
 void SSD::clearCommandBufferFiles() {

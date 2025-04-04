@@ -18,7 +18,7 @@ public:
 
 private:
 	bool isInvalidCommand(std::string& command);
-	bool isInvalidLBA(std::string& command);
+	bool isInvalidParam(std::string& paramStr, int min, int max);
 	void readFileAndUpdateMap(std::map<int, std::string>& map);
 	void loadCommandBuffer();
 	bool flushCommandBuffer();
