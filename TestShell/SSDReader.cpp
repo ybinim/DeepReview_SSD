@@ -29,12 +29,14 @@ int SSDReader::execute(vector<string>& param, bool print2Console) {
 
 int SSDReader::checkValidity(vector<string>& param) {
 	if (param.size() != 2) {
+		LOG_PRINT("Fail - Invalid parameter size");
 		return -2;
 	}
 
 	string lba = param[1];
 
 	if (lba.length() > 2 || isNumber(lba) == false) {
+		LOG_PRINT("Fail - Invalid LBA format");
 		return -2;
 	}
 

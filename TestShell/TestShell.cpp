@@ -6,9 +6,8 @@ int TestShell::run(string command) {
     vector<string> param = parseCommand(command, ' ');
     int result = 0;
 
-    LOG_PRINT("Log Test");
-
     if (param[0].compare("exit") == 0) {
+        LOG_PRINT("Exit");
         return 1;
     }
     else if (param[0].compare("read") == 0) {
@@ -19,12 +18,14 @@ int TestShell::run(string command) {
     }
     else if (param[0].compare("fullread") == 0) {
         if (param.size() != 1) {
+            LOG_PRINT("Fail - Invalid parameter size");
             return -2;
         }
         result = runFullRead();
     }
     else if (param[0].compare("fullwrite") == 0) {
         if (param.size() != 2) {
+            LOG_PRINT("Fail - Invalid parameter size");
             return -2;
         }
         result = runFullWrite(param);
@@ -55,6 +56,7 @@ int TestShell::run(string command) {
         printTestScriptResult(result);
     }
     else {
+        LOG_PRINT("Fail - Invalid command (" + param[0] + ")");
         cout << "INVALID COMMAND" << endl;
         return -1;
     }

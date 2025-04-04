@@ -3,6 +3,7 @@
 
 int SSDFlusher::execute(vector<string>& param, bool print2Console) {
 	if (param.size() != 1) {
+		LOG_PRINT("Fail - Invalid parameter size");
 		return -2;
 	}
 

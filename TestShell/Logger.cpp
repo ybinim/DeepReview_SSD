@@ -19,11 +19,15 @@ void Logger::print(const string& classFuncName, const string& message) {
             classStr = classFuncName.substr(0, pos);
             functionStr = classFuncName.substr(pos + 2);
         }
+        
+        string fullFunctionName = classStr + "." + functionStr + "()";
 
-        cout << "[" << timeStr << "] " << classStr << "." << functionStr << std::setw(30) << std::left << "()"
+        cout << "[" << timeStr << "] "
+            << std::setw(30) << std::left << fullFunctionName
             << ": " << message << endl;
 
-        logFile << "[" << timeStr << "] " << classStr << "." << functionStr << std::setw(30) << std::left << "()"
+        logFile << "[" << timeStr << "] "
+            << std::setw(30) << std::left << fullFunctionName
             << ": " << message << endl;
     }
     logFile.close();
