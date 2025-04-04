@@ -286,20 +286,6 @@ TEST_F(TestShellTestFixture, InvalidFullWriteTest)
 }
 
 
-TEST_F(TestShellTestFixture, WriteReadAgingValidTest)
-{
-	int ret = shell->run("3_WriteReadAging");
-	EXPECT_EQ(ret, 0);
-
-	ret = shell->run("3_");
-	EXPECT_EQ(ret, 0);
-
-	ret = shell->run("3");
-	EXPECT_EQ(ret, -1);
-
-	ret = shell->run("3__");
-	EXPECT_EQ(ret, -1);
-}
 
 TEST_F(TestShellTestFixture, FullReadTestNotrecorded)
 {
@@ -488,7 +474,28 @@ TEST_F(TestShellTestFixture, 2_PartialLBAWriteTestWithReadCompareFailCondition)
 
 }
 
-TEST_F(TestShellTestFixture, EraseAndWriteAgingValidTest)
+
+TEST_F(TestShellTestFixture, 3_WriteReadAgingValidTest)
+{
+	MockTestShell mockShell(&reader, &writer, &eraser, &flusher);
+
+	EXPECT_CALL(mockShell, readCompare(_))
+		.Times(400)
+		.WillRepeatedly(Return(0));
+
+	EXPECT_EQ(0, mockShell.run("3_"));
+}
+
+TEST_F(TestShellTestFixture, 3_WriteReadAgingInValidTest)
+{
+	int ret = shell->run("3");
+	EXPECT_EQ(ret, -1);
+
+	ret = shell->run("3__");
+	EXPECT_EQ(ret, -1);
+}
+
+TEST_F(TestShellTestFixture, 4_EraseAndWriteAgingValidTest)
 {
 	int ret = shell->run("4_EraseAndWriteAging");
 	EXPECT_EQ(ret, 0);
