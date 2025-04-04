@@ -67,8 +67,6 @@ bool SSD::run(string input) {
 		ret = updateCommandBuffer(commandStr, lba, dataStr);
 	}
 
-	cout << input << " DONE\n" << endl;
-
 	return ret;
 }
 
@@ -207,7 +205,6 @@ bool SSD::updateCommandBuffer(string& command, int lba, string& param)
 		if (command == "W") {
 			if ((it->command == "W") && (it->lba == lba)) {
 				// write to same LBA -> overwrite
-				cout << "overwrite to lba " << it->lba << endl;
 				it->param = param;
 				skip = true;
 				break;
@@ -218,7 +215,6 @@ bool SSD::updateCommandBuffer(string& command, int lba, string& param)
 			if (it->command == "W") {
 				if ((it->lba >= lba) && (it->lba < lba + size)) {
 					// erase after write -> remove write
-					cout << "erase after write " << it->lba << " " << lba << " " << size << endl;
 					it = commandBuffer.erase(it);
 					erased = true;
 				}
@@ -226,15 +222,13 @@ bool SSD::updateCommandBuffer(string& command, int lba, string& param)
 			else if (it->command == "E") {
 				int elememtSize = stoi(it->param);
 				
-				if ((it->lba >= lba) && (it->lba + size <= lba + size)) {
+				if ((it->lba >= lba) && (it->lba + elememtSize <= lba + size)) {
 					// erase wide range -> remove narrow one 
-					cout << "erase wide range " << it->lba << " " << it->param << " " << lba << " " << size << endl;
 					it = commandBuffer.erase(it);
 					erased = true;
 				}
-				else if ((it->lba <= lba) && (it->lba + size >= lba + size)) {
+				else if ((it->lba <= lba) && (it->lba + elememtSize >= lba + size)) {
 					// erase narrow range -> no need to update command buffer
-					cout << "erase narrow range " << it->lba << " " << it->param << " " << lba << " " << size << endl;
 					skip = true;
 					break;
 				}
