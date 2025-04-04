@@ -177,7 +177,8 @@ void TestShell::printHelp() {
 
 int TestShell::fullWriteAndReadCompare() {
     bool print2Console = false;
-    string expectedData = "0xAAAABBBB";
+    int data = 53681003;
+    string expectedData = "0x";
     vector<string> writeParam;
     vector<string> readParam;
     int result = 0;
@@ -186,6 +187,8 @@ int TestShell::fullWriteAndReadCompare() {
 
     while (lba < 100)
     {
+        expectedData += to_string(data);
+        data += 16;
         for (int writecount = 0; writecount < loopSize; writecount++)
         {
             writeParam.push_back("write");
@@ -216,6 +219,7 @@ int TestShell::fullWriteAndReadCompare() {
                 return result;
             }
         }
+        expectedData = "0x";
     }
 
     return result;

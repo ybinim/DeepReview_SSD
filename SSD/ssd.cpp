@@ -12,24 +12,12 @@ bool SSD::run(string input) {
 	bool ret = true;
 	int lba = -1;
 
-	stringstream inputStream(input);
-	// 스트림을 통해, 문자열을 공백 분리해 변수에 할당
-	string commandStr, lbaStr, dataStr;
-	inputStream >> commandStr >> lbaStr >> dataStr;
+	vector<string> param = parseString(input, ' ');
+	string commandStr = param[0];
+	string lbaStr = "";
+	string dataStr = "";
 
-	if (isInvalidCommand(commandStr)) {
-		return false;
-	}
-
-	if ((commandStr != "F") && isInvalidParam(lbaStr, 0, 99)) {
-		ofstream outputFile(outputfilePath, ios::trunc);
-		outputFile << "ERROR";
-		return false;
-	}
-
-	if ((commandStr == "E") && isInvalidParam(dataStr, 0, 10)) {
-		ofstream outputFile(outputfilePath, ios::trunc);
-		outputFile << "ERROR";
+	if (isInvalidParam(param)) {
 		return false;
 	}
 
@@ -41,6 +29,7 @@ bool SSD::run(string input) {
 	}
 	else if (commandStr == "R")
 	{
+		lbaStr = param[1];
 		lba = stoi(lbaStr);
 		ret = searchInCommandBuffer(lba);
 		if (ret == true) {
@@ -57,6 +46,7 @@ bool SSD::run(string input) {
 	}
 	else if ((commandStr == "W") || (commandStr == "E"))
 	{
+		lbaStr = param[1];
 		lba = stoi(lbaStr);
 		if (commandBuffer.size() == 5) {
 			ret = flushCommandBuffer();
@@ -64,36 +54,113 @@ bool SSD::run(string input) {
 				return ret;
 			}
 		}
+
+		dataStr = param[2];
 		ret = updateCommandBuffer(commandStr, lba, dataStr);
 	}
 
 	return ret;
 }
 
-bool SSD::isInvalidCommand(string& command) {
-	return !((command == "W") || (command == "R") || (command == "E") || (command == "F"));
-
-}
-
-bool SSD::isInvalidParam(string& paramStr, int min, int max) {
-	int param = 0;
+bool
+SSD::IsInvalidLBA(string lbaStr)
+{
+	int lba = 0;
 	bool ret = false;
 
 	try {
-		param = stoi(paramStr);
+		lba = std::stoi(lbaStr);
 
-		if (param < min || param > max) {
+		if (lba < 0 || lba >= 100) {
 			ret = true;
 		}
 	}
-	catch (const invalid_argument& e) {
+	catch (const std::invalid_argument& e) {
 		ret = true;
 	}
-	catch (const out_of_range& e) {
+	catch (const std::out_of_range& e) {
 		ret = true;
 	}
 
 	return ret;
+}
+
+bool SSD::isInvalidParam(vector<string>& param) {
+	string commandStr = param[0];
+
+	if (commandStr == "F")
+	{
+		if (param.size() != 1) {
+			return true;
+		}
+	}
+	else
+	{
+		string lbaStr = param[1];
+		if (IsInvalidLBA(lbaStr))
+		{
+			ofstream outputFile(outputfilePath, ios::trunc);
+			outputFile << "ERROR";
+			return true;
+		}
+
+		if (commandStr == "R")
+		{
+			if (param.size() != 2) {
+				return true;
+			}
+		}
+		else if (commandStr == "W")
+		{
+			if (param.size() != 3) {
+				return true;
+			}
+
+			string dataStr = param[2];
+			if (dataStr.length() != 10) {
+				return true;
+			}
+
+			if (dataStr.substr(0, 2).compare("0x") != 0) {
+				return true;
+			}
+
+			for (char& c : dataStr.substr(2, string::npos)) {
+				if (!(c >= '0' && c <= '9') && !(c >= 'A' && c <= 'F')) {
+					return true;
+				}
+			}
+		}
+		else if (commandStr == "E")
+		{
+			if (param.size() != 3) {
+				return true;
+			}
+
+			string sizeStr = param[2];
+			try {
+				int size = std::stoi(sizeStr);
+
+				if (size < 0 || size > 10) {
+					ofstream outputFile(outputfilePath, ios::trunc);
+					outputFile << "ERROR";
+					return true;
+				}
+			}
+			catch (const std::invalid_argument& e) {
+				return true;
+			}
+			catch (const std::out_of_range& e) {
+				return true;
+			}
+
+		}
+		else {
+			return true; // Invalid Command
+		}
+	}
+
+	return false;
 }
 
 void SSD::readFileAndUpdateMap(map<int, string>& map) {
