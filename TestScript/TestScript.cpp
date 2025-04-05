@@ -7,7 +7,7 @@ void TestScript::registerCallback(TestScriptCallback* cb) {
 
 int TestScript::execute(string command) {
     int result = -1;
-
+#if 0
     if ((command.compare("5_EraseAndWrite2times") == 0) || (command.compare("5_") == 0)) {
         result = eraseAndWrite();
         printTestScriptResult(result);
@@ -16,6 +16,7 @@ int TestScript::execute(string command) {
         result = runFullRead();
         printTestScriptResult(result);
     }
+#endif
     return result;
 }
 
@@ -38,7 +39,7 @@ int TestScript::runFullRead(void)
             return result;
         }
     }
-    std::cout << "[FullRead] Done" << endl;
+    //std::cout << "[FullRead] Done" << endl;
     return result;
 }
 
