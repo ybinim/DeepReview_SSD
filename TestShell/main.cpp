@@ -16,10 +16,7 @@ int prePareToUseTestScript(TestScriptCallback& cb, TestShell* shell);
 #ifdef _DEBUG
 int main() {
 	::testing::InitGoogleMock();
-	RUN_ALL_TESTS();
-	std::cout << "엔터를 누르면 종료됩니다...";
-	std::cin.get();
-	return 0;
+	return RUN_ALL_TESTS();
 }
 #else
 int main(int argc, char* argv[]) {
