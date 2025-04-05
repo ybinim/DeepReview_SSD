@@ -399,10 +399,8 @@ int TestShell::runSSDWriter(int lba, std::string& data, const int& numOfTimes, b
 
 void TestShell::setTestScript(std::shared_ptr<TestScript> script) {
     script_ = script;  // TestScript 객체를 저장
-    //std::cout << "TestScript 객체가 TestShell에 등록되었습니다." << std::endl;
 }
 
 int TestShell::runTestScript(string command) {
-    int result = script_->execute(command);
-    return result;
+    return script_->execute(command);
 }

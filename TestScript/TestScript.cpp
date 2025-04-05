@@ -3,13 +3,11 @@
 
 void TestScript::registerCallback(TestScriptCallback* cb) {
     cb_ = cb;
-    //std::cout << "[TestScript] Callback registered!" << std::endl;
 }
 
 int TestScript::execute(string command) {
     int result = -1;
 
-    //std::cout << command << std::endl;
     if ((command.compare("5_EraseAndWrite2times") == 0) || (command.compare("5_") == 0)) {
         result = eraseAndWrite();
         printTestScriptResult(result);
@@ -24,7 +22,6 @@ int TestScript::execute(string command) {
 int TestScript::runFullRead(void)
 {
     if (!cb_ || !cb_->reader) {
-        //std::cout << "[Error] Eraser callback not registered!" << std::endl;
         return -1;
     }
 
@@ -54,7 +51,6 @@ int TestScript::eraseAndWrite() {
 
     result = runSSDEraser(lba, lba + increaseSize, print2Console);
     if (result != 0) {
-        //std::cout << "after runSSDEraser1 : " << result << std::endl;
         return result;
     }
 
@@ -63,13 +59,11 @@ int TestScript::eraseAndWrite() {
         int runNumberOfTimes = 2;
         result = runSSDWriter(lba, data, runNumberOfTimes, print2Console);
         if (result != 0) {
-            //std::cout << "after runSSDWriter : " << result << std::endl;
             return result;
         }
 
         result = runSSDEraser(lba, lba + increaseSize, print2Console);
         if (result != 0) {
-            //std::cout << "after runSSDEraser2 : " << result << std::endl;
             return result;
         }
 
@@ -83,15 +77,13 @@ int TestScript::runSSDEraser(int startLBA, int endLBA, bool print2Console)
     int result = 0;
 
     if (!cb_ || !cb_->eraser) {
-        //std::cout << "[Error] Eraser callback not registered!" << std::endl;
         return -1;
     }
 
     if (endLBA >= 100) {
         endLBA = 99;
     }
-    //std::cout << startLBA << " " << endLBA << std::endl;
-    std::vector<std::string> param = { "erase_range", std::to_string(startLBA), std::to_string(endLBA) };
+    vector<string> param = { "erase_range", std::to_string(startLBA), std::to_string(endLBA) };
     return cb_->eraser->execute(param, print2Console);
 
     return result;
@@ -102,12 +94,11 @@ int TestScript::runSSDWriter(int lba, std::string& data, const int& numOfTimes, 
     int result = 0;
 
     if (!cb_ || !cb_->writer) {
-        //std::cout << "[Error] Writer callback not registered!" << std::endl;
         return -1;
     }
 
     for (int i = 0; i < numOfTimes; ++i) {
-        std::vector<std::string> param = { "write", std::to_string(lba), data };
+        vector<string> param = { "write", std::to_string(lba), data };
         int result = cb_->writer->execute(param, print2Console);
         if (result != 0) return result;
     }
