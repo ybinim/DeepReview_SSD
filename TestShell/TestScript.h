@@ -12,7 +12,9 @@
 #include <memory>
 #include <string>
 
-#include "TestScriptCallback.h" 
+#include "TestScriptCallback.h"
+
+#define TEST_SCRIPT_DLL_NAME L"TestScript.dll"
 
 class TESTSCRIPT_API TestScript {
 public:
@@ -20,3 +22,6 @@ public:
     int execute(string command);
 
 };
+
+// 함수 선언 (DLL 내보내기)
+extern "C" __declspec(dllexport) TestScript* CreateTestScript();

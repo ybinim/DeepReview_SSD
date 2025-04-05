@@ -7,13 +7,13 @@ void TestScript::registerCallback(TestScriptCallback* cb) {
 
 int TestScript::execute(string command) {
     int result = -1;
-#if 0
-    if ((command.compare("5_EraseAndWrite2times") == 0) || (command.compare("5_") == 0)) {
-        result = eraseAndWrite();
+    if ((command.compare("5_FullRead") == 0) || (command.compare("5_") == 0)) {
+        result = runFullRead();
         printTestScriptResult(result);
     }
-    else if ((command.compare("6_FullRead") == 0) || (command.compare("6_") == 0)) {
-        result = runFullRead();
+#if 0
+    elseif ((command.compare("6_EraseAndWrite2times") == 0) || (command.compare("6_") == 0)) {
+        result = eraseAndWrite();
         printTestScriptResult(result);
     }
 #endif

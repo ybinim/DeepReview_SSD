@@ -13,6 +13,8 @@
 #include <string>
 #include "TestScriptCallback.h" 
 
+#define TEST_SCRIPT_DLL_NAME L"TestScript.dll"
+
 class TESTSCRIPT_API TestScript {
 public:
     void registerCallback(TestScriptCallback* cb);

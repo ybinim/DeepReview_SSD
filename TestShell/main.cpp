@@ -14,8 +14,6 @@
 typedef TestScript* (*CreateTestScriptFunc)(); // DLL에서 TestScript 객체 생성 함수
 int prePareToUseTestScript(TestScriptCallback& cb, TestShell* shell);
 
-#define TEST_SCRIPT_DLL_NAME L"TestScript.dll"
-
 #ifdef _DEBUG
 int main() {
 	::testing::InitGoogleMock();
