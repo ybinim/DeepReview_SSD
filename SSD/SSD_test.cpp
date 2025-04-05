@@ -3,6 +3,7 @@
 #include <map>
 #include <fstream>
 #include <cstdio>
+#include <filesystem>
 
 #include "ssd.h"
 
@@ -11,6 +12,7 @@ using namespace testing;
 class SSDFixture : public Test {
 protected:
 	void SetUp() override {
+		initCommandBuffer();
 		deleteOutPutFile();
 		deleteNandFile();
 	}
@@ -43,6 +45,12 @@ protected:
 		deleteFile(nandFilePath);
 	}
 
+	void initCommandBuffer() {
+		if (std::filesystem::exists(bufferDirPath)) {
+			std::filesystem::remove_all(bufferDirPath);
+		}
+	}
+
 	void prepareRead() {
 		std::ofstream file(nandFilePath.c_str());
 		for (auto& data : nand) {
@@ -60,9 +68,11 @@ protected:
 	SSD mySsd;
 	ReadSSD myRead;
 	WriteSSD myWrite;
+	EraseSSD myErase;
 
 	const std::string outputFilePath = "ssd_output.txt";
 	const std::string nandFilePath = "ssd_nand.txt";
+	const std::string bufferDirPath = "buffer";
 };
 
 TEST_F(SSDFixture, SSDTest_ValidWriteCommand)
@@ -156,15 +166,14 @@ TEST_F(SSDFixture, ReadWithDataTest2)
 
 TEST_F(SSDFixture, WriteWithDataTest)
 {
-	std::map<int, std::string> nand = { };
 	bool ret = myWrite.execute(nand, 2, "0xCCCCCCCC");
 	EXPECT_EQ(ret, true);
 }
 
 TEST_F(SSDFixture, WriteFileUpdateTest)
 {
-	std::map<int, std::string> nand = { };
-	myWrite.execute(nand, 2, "0xCCCCCCCC");
+	std::map<int, std::string> emptyNand;
+	myWrite.execute(emptyNand, 2, "0xCCCCCCCC");
 
 	std::ifstream file(nandFilePath.c_str());
 	std::string output = "";
@@ -174,11 +183,9 @@ TEST_F(SSDFixture, WriteFileUpdateTest)
 
 TEST_F(SSDFixture, WriteFileUpdateChangeMapValueTest)
 {
-	WriteSSD myWrite;
-	std::map<int, std::string> nand = { };
-
-	myWrite.execute(nand, 2, "0xCCCCCCCC");
-	myWrite.execute(nand, 2, "0xDDDDDDDD");
+	std::map<int, std::string> emptyNand;
+	myWrite.execute(emptyNand, 2, "0xCCCCCCCC");
+	myWrite.execute(emptyNand, 2, "0xDDDDDDDD");
 
 	std::ifstream file(nandFilePath.c_str());
 	std::string output = "";
@@ -186,41 +193,35 @@ TEST_F(SSDFixture, WriteFileUpdateChangeMapValueTest)
 	EXPECT_EQ("2 0xDDDDDDDD", output);
 }
 
-TEST_F(SSDFixture, EraseTest_ValidSize)
+TEST_F(SSDFixture, ValidEraseParam)
 {
 	bool ret = mySsd.run("E 0 10");
 	EXPECT_EQ(ret, true);
-}
 
-TEST_F(SSDFixture, EraseTest_ValidSize2)
-{
 	// Size 0은 에러는 아니다. 아무런 동작을 하지 않는다.
-	bool ret = mySsd.run("E 0 0");
+	ret = mySsd.run("E 0 0");
+	EXPECT_EQ(ret, true);
+
+	// 99까지만 처리함.
+	ret = mySsd.run("E 95 10");
 	EXPECT_EQ(ret, true);
 }
 
-TEST_F(SSDFixture, EraseTest_InValidSize)
+TEST_F(SSDFixture, InvalidEraseParam)
 {
 	bool ret = mySsd.run("E 0 -1");
 	EXPECT_EQ(ret, false);
 	validCheckOfOutputFile("ERROR");
 }
 
-TEST_F(SSDFixture, EraseTest_InValidSize2)
+TEST_F(SSDFixture, InvalidEraseParam2)
 {
 	bool ret = mySsd.run("E 0 11");
 	EXPECT_EQ(ret, false);
 	validCheckOfOutputFile("ERROR");
 }
 
-TEST_F(SSDFixture, EraseTest_ValidSizeButOutOfRange)
-{
-	// 99까지만 처리함.
-	bool ret = mySsd.run("E 95 10");
-	EXPECT_EQ(ret, true);
-}
-
-TEST_F(SSDFixture, EraseTest_InValidLBA)
+TEST_F(SSDFixture, InvalidEraseParam3)
 {
 	bool ret = mySsd.run("E 100 10");
 	EXPECT_EQ(ret, false);
@@ -229,15 +230,16 @@ TEST_F(SSDFixture, EraseTest_InValidLBA)
 
 TEST_F(SSDFixture, EraseTest_WriteAndErase)
 {
-	mySsd.run("W 0 0x12345678");
-	mySsd.run("W 1 0xCCCCCCCC");
-	mySsd.run("W 2 0x1234ABCD");
-	mySsd.run("W 3 0xCCCCCCCC");
-	mySsd.run("W 4 0x00000000");
-	mySsd.run("W 5 0x5555AAAA");
-	mySsd.run("W 6 0xCCCCCCCC");
+	std::map<int, std::string> emptyNand;
+	myWrite.execute(emptyNand, 0, "0x12345678");
+	myWrite.execute(emptyNand, 1, "0xCCCCCCCC");
+	myWrite.execute(emptyNand, 2, "0x1234ABCD");
+	myWrite.execute(emptyNand, 3, "0xCCCCCCCC");
+	myWrite.execute(emptyNand, 4, "0x00000000");
+	myWrite.execute(emptyNand, 5, "0x5555AAAA");
+	myWrite.execute(emptyNand, 6, "0xCCCCCCCC");
 
-	bool ret = mySsd.run("E 4 10");
+	bool ret = myErase.execute(emptyNand, 4, "10");
 	EXPECT_EQ(ret, true);
 
 	for (int i = 4; i < 14; i++)
@@ -251,20 +253,283 @@ TEST_F(SSDFixture, EraseTest_WriteAndErase)
 
 TEST_F(SSDFixture, EraseTest_WriteAndEraseWithSizeZero)
 {
-	mySsd.run("W 97 0x12345678");
-	mySsd.run("W 98 0xCCCCCCCC");
-	mySsd.run("W 99 0x1234ABCD");
+	std::map<int, std::string> emptyNand;
+	myWrite.execute(emptyNand, 97, "0x12345678");
+	myWrite.execute(emptyNand, 98, "0xCCCCCCCC");
+	myWrite.execute(emptyNand, 99, "0x1234ABCD");
 
-	bool ret = mySsd.run("E 1 0");
+	bool ret = myErase.execute(emptyNand, 1, "0");
 	EXPECT_EQ(ret, true);
 }
 
 TEST_F(SSDFixture, EraseTest_WriteAndEraseWithSize1)
 {
-	mySsd.run("W 97 0x12345670");
-	mySsd.run("W 98 0xCCCCCCC0");
-	mySsd.run("W 99 0x1234ABC0");
+	std::map<int, std::string> emptyNand;
+	myWrite.execute(emptyNand, 97, "0x12345678");
+	myWrite.execute(emptyNand, 98, "0xCCCCCCCC");
+	myWrite.execute(emptyNand, 99, "0x1234ABCD");
 
-	bool ret = mySsd.run("E 1 1");
+	bool ret = myErase.execute(emptyNand, 1, "1");
 	EXPECT_EQ(ret, true);
+}
+
+TEST_F(SSDFixture, CommandBufferTest_Basic)
+{
+	bool ret = mySsd.run("W 0 0xAAAAAAAA");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 1 0xBBBBBBBB");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("E 3 4");
+	EXPECT_EQ(ret, true);
+
+	EXPECT_EQ(std::filesystem::exists(nandFilePath), false);
+
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/1_W_0_0xAAAAAAAA"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/2_W_1_0xBBBBBBBB"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/3_E_3_4"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/4_empty"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/5_empty"), true);
+}
+
+TEST_F(SSDFixture, CommandBufferTest_FullBuffer)
+{
+	bool ret = mySsd.run("W 0 0xAAAAAAAA");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 1 0xBBBBBBBB");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("E 3 10");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 5 0xCCCCCCCC");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 6 0xDDDDDDDD");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 10 0x10101010");
+	EXPECT_EQ(ret, true);
+
+	EXPECT_EQ(std::filesystem::exists(nandFilePath), true);
+	std::string data;
+	std::ifstream nandFile(nandFilePath.c_str());
+	getline(nandFile, data);
+	EXPECT_EQ(data, "0 0xAAAAAAAA");
+	getline(nandFile, data);
+	EXPECT_EQ(data, "1 0xBBBBBBBB");
+	getline(nandFile, data);
+	EXPECT_EQ(data, "5 0xCCCCCCCC");
+	getline(nandFile, data);
+	EXPECT_EQ(data, "6 0xDDDDDDDD");
+
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/1_W_10_0x10101010"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/2_empty"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/3_empty"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/4_empty"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/5_empty"), true);
+}
+
+TEST_F(SSDFixture, CommandBufferTest_Overwrite)
+{
+	bool ret = mySsd.run("W 0 0xAAAAAAAA");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 1 0xBBBBBBBB");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 0 0x12345678");
+	EXPECT_EQ(ret, true);
+
+	EXPECT_EQ(std::filesystem::exists(nandFilePath), false);
+
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/1_W_1_0xBBBBBBBB"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/2_W_0_0x12345678"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/3_empty"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/4_empty"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/5_empty"), true);
+}
+
+TEST_F(SSDFixture, CommandBufferTest_EraseAfterWrite1)
+{
+	bool ret = mySsd.run("W 0 0xAAAAAAAA");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 1 0xBBBBBBBB");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("E 1 3");
+	EXPECT_EQ(ret, true);
+
+	EXPECT_EQ(std::filesystem::exists(nandFilePath), false);
+
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/1_W_0_0xAAAAAAAA"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/2_E_1_3"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/3_empty"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/4_empty"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/5_empty"), true);
+}
+
+TEST_F(SSDFixture, CommandBufferTest_EraseAfterWrite2)
+{
+	bool ret = mySsd.run("W 4 0xAAAAAAAA");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 5 0xBBBBBBBB");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("E 0 10");
+	EXPECT_EQ(ret, true);
+
+	EXPECT_EQ(std::filesystem::exists(nandFilePath), false);
+
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/1_E_0_10"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/2_empty"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/3_empty"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/4_empty"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/5_empty"), true);
+}
+
+TEST_F(SSDFixture, CommandBufferTest_EraseWideRange)
+{
+	bool ret = mySsd.run("W 0 0xAAAAAAAA");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 1 0xBBBBBBBB");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("E 3 4");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("E 3 7");
+	EXPECT_EQ(ret, true);
+
+	EXPECT_EQ(std::filesystem::exists(nandFilePath), false);
+
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/1_W_0_0xAAAAAAAA"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/2_W_1_0xBBBBBBBB"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/3_E_3_7"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/4_empty"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/5_empty"), true);
+}
+
+TEST_F(SSDFixture, CommandBufferTest_EraseNarrowRange)
+{
+	bool ret = mySsd.run("W 0 0xAAAAAAAA");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 1 0xBBBBBBBB");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("E 3 4");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("E 4 1");
+	EXPECT_EQ(ret, true);
+
+	EXPECT_EQ(std::filesystem::exists(nandFilePath), false);
+
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/1_W_0_0xAAAAAAAA"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/2_W_1_0xBBBBBBBB"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/3_E_3_4"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/4_empty"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/5_empty"), true);
+}
+
+TEST_F(SSDFixture, CommandBufferTest_ReadFromCommandBuffer)
+{
+	bool ret = mySsd.run("W 0 0xAAAAAAAA");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 1 0xAAAAAAAA");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 2 0xAAAAAAAA");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 3 0xAAAAAAAA");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 4 0xAAAAAAAA");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 0 0xCCCCCCCC");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("R 0");
+	EXPECT_EQ(ret, true);
+
+	EXPECT_EQ(std::filesystem::exists(nandFilePath), true);
+	EXPECT_EQ(std::filesystem::exists(outputFilePath), true);
+	std::string data;
+	std::ifstream outputFile;
+	outputFile.open(outputFilePath.c_str());
+	getline(outputFile, data);
+	outputFile.close();
+	EXPECT_EQ(data, "0xCCCCCCCC");
+
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/1_W_0_0xCCCCCCCC"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/2_empty"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/3_empty"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/4_empty"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/5_empty"), true);
+
+	ret = mySsd.run("R 1");
+	EXPECT_EQ(ret, true);
+	outputFile.open(outputFilePath.c_str());
+	getline(outputFile, data);
+	outputFile.close();
+	EXPECT_EQ(data, "0xAAAAAAAA");
+}
+
+TEST_F(SSDFixture, CommandBufferTest_ReadFromCommandBuffer2)
+{
+	bool ret = mySsd.run("W 0 0xAAAAAAAA");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 1 0xAAAAAAAA");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 2 0xAAAAAAAA");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 3 0xAAAAAAAA");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 4 0xAAAAAAAA");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 0 0xCCCCCCCC");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("E 1 10");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("E 2 11");
+	EXPECT_EQ(ret, false);
+	ret = mySsd.run("R 0");
+	EXPECT_EQ(ret, true);
+
+	EXPECT_EQ(std::filesystem::exists(nandFilePath), true);
+	EXPECT_EQ(std::filesystem::exists(outputFilePath), true);
+	std::string data;
+	std::ifstream outputFile;
+	outputFile.open(outputFilePath.c_str());
+	getline(outputFile, data);
+	outputFile.close();
+	EXPECT_EQ(data, "0xCCCCCCCC");
+
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/1_W_0_0xCCCCCCCC"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/2_E_1_10"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/3_empty"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/4_empty"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/5_empty"), true);
+
+	ret = mySsd.run("R 1");
+	EXPECT_EQ(ret, true);
+	outputFile.open(outputFilePath.c_str());
+	getline(outputFile, data);
+	outputFile.close();
+	EXPECT_EQ(data, "0x00000000");
+}
+
+TEST_F(SSDFixture, FlushTest)
+{
+	bool ret = mySsd.run("W 0 0xAAAAAAAA");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 1 0xAAAAAAAA");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 2 0xAAAAAAAA");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("E 95 10");
+	EXPECT_EQ(ret, true);
+
+	EXPECT_EQ(std::filesystem::exists(nandFilePath), false);
+
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/1_W_0_0xAAAAAAAA"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/2_W_1_0xAAAAAAAA"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/3_W_2_0xAAAAAAAA"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/4_E_95_10"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/5_empty"), true);
+
+	ret = mySsd.run("F");
+	EXPECT_EQ(ret, true);
+
+	EXPECT_EQ(std::filesystem::exists(nandFilePath), true);
+
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/1_empty"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/2_empty"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/3_empty"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/4_empty"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/5_empty"), true);
 }

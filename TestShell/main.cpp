@@ -11,28 +11,37 @@
 #include "TestScript.h"
 
 typedef TestScript* (*CreateTestScriptFunc)(); // DLL에서 TestScript 객체 생성 함수
-int prePareToUseTestScript(std::shared_ptr<TestShell> shell);
+int prePareToUseTestScript(TestScriptCallback& cb, TestShell* shell);
 
 #ifdef _DEBUG
 int main() {
 	::testing::InitGoogleMock();
-	return RUN_ALL_TESTS();
+	RUN_ALL_TESTS();
+	std::cout << "엔터를 누르면 종료됩니다...";
+	std::cin.get();
+	return 0;
 }
 #else
 int main(int argc, char* argv[]) {
 	std::string command;
 	int ret;
 
-	SSDReader reader;
-	SSDWriter writer;
-	SSDEraser eraser;
-	SSDFlusher flusher;
+	// 1. SSDExecutor 인스턴스 생성
+	static SSDReader reader;
+	static SSDWriter writer;
+	static SSDEraser eraser;
+	static SSDFlusher flusher;
 
-	//TestShell* shell = new TestShell(&reader, &writer, &eraser, &flusher);
-	// TestShell 객체를 std::shared_ptr로 생성
-	std::shared_ptr<TestShell> shell = std::make_shared<TestShell>(&reader, &writer, &eraser, &flusher);
+	TestShell* shell = new TestShell(&reader, &writer, &eraser, &flusher);
 
-	prePareToUseTestScript(shell);
+	// 2. 콜백 구조체 세팅
+	TestScriptCallback cb;
+	cb.reader = &reader;
+	cb.writer = &writer;
+	cb.eraser = &eraser;
+	cb.flusher = &flusher;
+
+	prePareToUseTestScript(cb, shell);
 
 	if (argc == 1) {
 		while (true) {
@@ -67,7 +76,7 @@ int main(int argc, char* argv[]) {
 	return -1;
 }
 
-int prePareToUseTestScript(std::shared_ptr<TestShell> myShell) {
+int prePareToUseTestScript(TestScriptCallback& cb, TestShell* shell) {
 	// DLL 로드
 	HMODULE hDLL = LoadLibrary(L"TestScript.dll");
 	if (!hDLL) {
@@ -75,7 +84,7 @@ int prePareToUseTestScript(std::shared_ptr<TestShell> myShell) {
 		return -1;
 	}
 	
-	CreateTestScriptFunc createTestScript = (CreateTestScriptFunc)GetProcAddress(hDLL, "CreateMyTestScript");
+	CreateTestScriptFunc createTestScript = (CreateTestScriptFunc)GetProcAddress(hDLL, "CreateTestScript");
 	if (!createTestScript) {
 		std::cout << "CreateTestScript 함수를 찾을 수 없습니다." << std::endl;
 		FreeLibrary(hDLL);
@@ -92,9 +101,10 @@ int prePareToUseTestScript(std::shared_ptr<TestShell> myShell) {
 
 	// TestScript 객체를 TestShell에 등록
 	std::shared_ptr<TestScript> scriptPtr(script);
-	myShell->setTestScript(scriptPtr);  // TestScript 등록
+	
+	shell->setTestScript(scriptPtr);  // TestScript 등록
 
-	script->addShell(myShell);
+	script->registerCallback(&cb);
 
 	// DLL 언로드
 	//FreeLibrary(hDLL);

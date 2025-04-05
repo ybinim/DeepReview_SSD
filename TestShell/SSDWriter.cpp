@@ -5,37 +5,17 @@
 using namespace std;
 
 int SSDWriter::execute(vector<string>& param, bool print2Console) {
-	if (param.size() != 3) {
-		return -2;
-	}
-
-	string lba = param[1];
-	string data = param[2];
-
-	if (lba.length() > 2 || isNumber(lba) == false) {
-		return -2;
-	}
-
-	if (data.length() != 10) {
-		return -2;
-	}
-
-	if (data.substr(0, 2).compare("0x") != 0) {
-		return -2;
-	}
-
-	for (char& c : data.substr(2, string::npos)) {
-		if (!(c >= '0' && c <= '9') && !(c >= 'A' && c <= 'F')) {
-			return -2;
-		}
+	int ret = checkParam(param);
+	if (ret != 0) {
+		return ret;
 	}
 
 	string command = "ssd.exe W ";
-	command += lba;
+	command += param[1];
 	command += " ";
-	command += data;
+	command += param[2];
 
-	int ret = system(command.c_str());
+	ret = system(command.c_str());
 	if (ret != 0) {
 		return ret;
 	}
@@ -45,4 +25,38 @@ int SSDWriter::execute(vector<string>& param, bool print2Console) {
 	}
 
 	return ret;
+}
+
+int SSDWriter::checkParam(vector<string>& param)
+{
+	if (param.size() != 3) {
+		LOG_PRINT("Fail - Invalid parameter size");
+		return -2;
+	}
+
+	string lba = param[1];
+	string data = param[2];
+
+	if (isValidLba(lba) == false) {
+		LOG_PRINT("Fail - Invalid LBA format");
+		return -2;
+	}
+
+	if (data.length() != 10) {
+		LOG_PRINT("Fail - Invalid DATA size");
+		return -2;
+	}
+
+	if (data.substr(0, 2).compare("0x") != 0) {
+		LOG_PRINT("Fail - Invalid DATA format");
+		return -2;
+	}
+
+	for (char& c : data.substr(2, string::npos)) {
+		if (!(c >= '0' && c <= '9') && !(c >= 'A' && c <= 'F')) {
+			LOG_PRINT("Fail - Invalid DATA format");
+			return -2;
+		}
+	}
+	return 0;
 }
