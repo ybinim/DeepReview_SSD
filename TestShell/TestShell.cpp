@@ -91,7 +91,6 @@ int TestShell::runFullWrite(std::vector<std::string>& param)
 
 int TestShell::runFullRead(void)
 {
-    bool print2console = false;
     int result = 0;
     vector<string> fullReadParam = { "read", "-1"};
     string data = "";
@@ -99,7 +98,7 @@ int TestShell::runFullRead(void)
     for (int i = 0; i < 100; i++) {
         fullReadParam[1] = to_string(i);
 
-        result = reader->execute(fullReadParam, false);
+        result = reader->execute(fullReadParam);
         if (result != 0) {
             return result;
         }
