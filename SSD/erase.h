@@ -1,6 +1,4 @@
-#ifndef ERASESDD_H
-#define ERASESDD_H
-
+#pragma once
 #include "nand.h"
 
 class EraseSSD : public NANDFileHandler {
@@ -12,5 +10,3 @@ private:
 
     const std::string outputfilePath = "ssd_output.txt";
 };
-
-#endif
