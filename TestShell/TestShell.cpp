@@ -415,8 +415,8 @@ int TestShell::runTestScript(string command) {
     result = loadDLLAndRegisterCallback(TEST_SCRIPT_DLL);
     if (result == 0) {
         result = script_->execute(command);
-        if (result != 0) {
-            LOG_PRINT("Failed to execute the command.");
+        if (result == 0) {
+            LOG_PRINT("The command execution was successful!");
             return result;
         }
     }
@@ -429,8 +429,8 @@ int TestShell::runTestScript(string command) {
         result = loadDLLAndRegisterCallback(dllName);
         if (result == 0) {
             result = script_->execute(command);
-            if (result != 0) {
-                LOG_PRINT("Failed to execute the command.");
+            if (result == 0) {
+                LOG_PRINT("The command execution was successful!");
                 return result;
             }
         }
