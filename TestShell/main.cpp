@@ -1,3 +1,4 @@
+﻿//#include <windows.h>   // DLLMain 관련 헤더
 #include "gmock/gmock.h"
 #include "TestShell.h"
 #include "SSDReader.h"
@@ -7,6 +8,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+//#include "TestScriptCallback.h"
 
 #ifdef _DEBUG
 int main() {
@@ -18,10 +20,12 @@ int main(int argc, char* argv[]) {
 	std::string command;
 	int ret;
 
-	SSDReader reader;
-	SSDWriter writer;
-	SSDEraser eraser;
-	SSDFlusher flusher;
+	// 1. SSDExecutor 인스턴스 생성
+	static SSDReader reader;
+	static SSDWriter writer;
+	static SSDEraser eraser;
+	static SSDFlusher flusher;
+
 	TestShell* shell = new TestShell(&reader, &writer, &eraser, &flusher);
 
 	if (argc == 1) {

@@ -1,8 +1,17 @@
-﻿#include "TestShell.h"
+﻿#include <windows.h>   // DLLMain 관련 헤더
+#include "TestShell.h"
 
 #define SSD_OUTPUT_FILEPATH ("ssd_output.txt")
 
 using namespace std;
+
+typedef TestScript* (*CreateTestScriptFunc)(); // DLL에서 TestScript 객체 생성 함수
+
+TestShell::TestShell(SSDExecutor* reader, SSDExecutor* writer, SSDExecutor* eraser, SSDExecutor* flusher)
+    : reader(reader), writer(writer), eraser(eraser), flusher(flusher) {
+    // 2. TestScript에 등록할 콜백 구조체 세팅
+    cb.reader = reader; cb.writer = writer; cb.eraser = eraser; cb.flusher = flusher;
+}
 
 int TestShell::run(string command) {
     vector<string> param = parseCommand(command, ' ');
@@ -62,11 +71,13 @@ int TestShell::run(string command) {
         printTestScriptResult(result);
     }
     else {
-        LOG_PRINT("Fail - Invalid command (" + command + ")");
-        cout << "INVALID COMMAND" << endl;
-        return -1;
+        result = runTestScript(command);
+        if (result != 0) {
+            LOG_PRINT("Fail - Invalid command (" + command + ")");
+            cout << "INVALID COMMAND" << endl;
+            return -1;
+        }
     }
-
     return result;
 }
 
@@ -396,4 +407,71 @@ int TestShell::runSSDWriter(int lba, std::string& data, const int& numOfTimes, b
         }
     }
     return result;
+}
+
+void TestShell::setTestScript(std::shared_ptr<TestScript> script) {
+    script_ = script;  // TestScript 객체를 저장
+}
+
+int TestShell::runTestScript(string command) {
+    int result = -1;
+
+    result = loadDLLAndRegisterCallback(TEST_SCRIPT_DLL);
+    if (result == 0) {
+        result = script_->execute(command);
+        if (result == 0) {
+            LOG_PRINT("The command execution was successful!");
+            return result;
+        }
+    }
+
+    // If TEST_SCRIPT_DLL failed, try TestScript_0.dll to TestScript_9.dll
+    for (int i = 0; i < 10; ++i) {
+        wchar_t dllName[MAX_PATH];
+        swprintf(dllName, MAX_PATH, TEST_SCRIPT_DLL_NAME_FORMAT, i);
+
+        result = loadDLLAndRegisterCallback(dllName);
+        if (result == 0) {
+            result = script_->execute(command);
+            if (result == 0) {
+                LOG_PRINT("The command execution was successful!");
+                return result;
+            }
+        }
+    }
+
+    return result;
+}
+
+int TestShell::loadDLLAndRegisterCallback(const wchar_t* dllName) {
+    HMODULE hDLL = LoadLibrary(dllName);
+    if (!hDLL) {
+        LOG_PRINT("Unable to load DLL.");
+        return -1;
+    }
+
+    // Try to load the function from the DLL
+    CreateTestScriptFunc createTestScript = (CreateTestScriptFunc)GetProcAddress(hDLL, "CreateTestScript");
+    if (!createTestScript) {
+        LOG_PRINT("Unable to find CreateTestScript function");
+        FreeLibrary(hDLL);
+        return -1;
+    }
+
+    // Create TestScript object
+    TestScript* script = createTestScript();
+    if (!script) {
+        LOG_PRINT("Failed to create TestScript object.");
+        FreeLibrary(hDLL);
+        return -1;
+    }
+
+    // Register the TestScript object and callback
+    script_ = std::shared_ptr<TestScript>(script);
+    script_->registerCallback(&cb);
+
+    // Unload the DLL after registration
+    //FreeLibrary(hDLL);
+
+    return 0;
 }

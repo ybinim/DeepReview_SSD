@@ -71,5 +71,11 @@
     <ClInclude Include="Logger.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="TestScriptCallback.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="TestScript.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
