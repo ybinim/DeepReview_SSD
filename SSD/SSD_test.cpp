@@ -503,6 +503,30 @@ TEST_F(SSDFixture, CommandBufferTest_ReadFromCommandBuffer2)
 	EXPECT_EQ(data, "0x00000000");
 }
 
+TEST_F(SSDFixture, CommandBufferTest_ReadFromCommandBuffer3)
+{
+	bool ret = mySsd.run("E 0 2");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("W 0 0xABABABAB");
+	EXPECT_EQ(ret, true);
+	ret = mySsd.run("R 0");
+	EXPECT_EQ(ret, true);
+
+	std::string data;
+	std::ifstream outputFile;
+	outputFile.open(outputFilePath.c_str());
+	getline(outputFile, data);
+	outputFile.close();
+	EXPECT_EQ(data, "0xABABABAB");
+
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/1_E_0_2"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/2_W_0_0xABABABAB"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/3_empty"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/4_empty"), true);
+	EXPECT_EQ(std::filesystem::exists(bufferDirPath + "/5_empty"), true);
+
+}
+
 TEST_F(SSDFixture, FlushTest)
 {
 	bool ret = mySsd.run("W 0 0xAAAAAAAA");
