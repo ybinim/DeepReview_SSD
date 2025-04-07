@@ -247,24 +247,27 @@ bool SSD::flushCommandBuffer() {
 }
 
 bool SSD::searchInCommandBuffer(int lba) {
-	for (const bufferElement& element : commandBuffer) {
-		if (element.command == "W") {
-			if (element.lba == lba) {
+	auto it = commandBuffer.rbegin();
+
+	while (it != commandBuffer.rend()) {
+		if (it->command == "W") {
+			if (it->lba == lba) {
 				ofstream outputFile(outputfilePath, ios::trunc);
-				outputFile << element.param;
+				outputFile << it->param;
 				outputFile.close();
 				return true;
 			}
 		}
-		else if (element.command == "E") {
-			int size = stoi(element.param);
-			if ((lba >= element.lba) && (lba < element.lba + size)) {
+		else if (it->command == "E") {
+			int size = stoi(it->param);
+			if ((lba >= it->lba) && (lba < it->lba + size)) {
 				ofstream outputFile(outputfilePath, ios::trunc);
 				outputFile << "0x00000000";
 				outputFile.close();
 				return true;
 			}
 		}
+		it++;
 	}
 
 	return false;
