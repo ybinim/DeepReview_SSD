@@ -7,6 +7,15 @@ using namespace std;
 
 typedef TestScript* (*CreateTestScriptFunc)(); // DLL에서 TestScript 객체 생성 함수
 
+TestShell::TestShell(SSDExecutor* reader, SSDExecutor* writer, SSDExecutor* eraser, SSDExecutor* flusher)
+    : reader(reader), writer(writer), eraser(eraser), flusher(flusher) {
+    // 2. TestScript에 등록할 콜백 구조체 세팅
+    static TestScriptCallback cb;
+    cb.reader = reader; cb.writer = writer; cb.eraser = eraser; cb.flusher = flusher;
+    cb_ = &cb;
+    //std::cout << "cb : " << cb_ << std::endl;
+}
+
 int TestShell::run(string command) {
     vector<string> param = parseCommand(command, ' ');
     int result = 0;
@@ -414,35 +423,70 @@ int TestShell::runTestScript(string command) {
 }
 
 int TestShell::loadDLLAndRegisterCallback() {
-    // DLL 로드
-    HMODULE hDLL = LoadLibrary(TEST_SCRIPT_DLL_NAME);
+    // 먼저 TestScript.dll 로드
+    HMODULE hDLL = LoadLibrary(TEST_SCRIPT_DLL);
     if (!hDLL) {
-        LOG_PRINT("DLL을 로드할 수 없습니다.");
-        return -1;
+        LOG_PRINT("DLL을 로드할 수 없습니다: %ws", TEST_SCRIPT_DLL);
+    }
+    else {
+        // TestScript.dll 로드 성공
+        CreateTestScriptFunc createTestScript = (CreateTestScriptFunc)GetProcAddress(hDLL, "CreateTestScript");
+        if (!createTestScript) {
+            LOG_PRINT("CreateTestScript 함수를 찾을 수 없습니다: %ws", TEST_SCRIPT_DLL);
+            FreeLibrary(hDLL);
+        }
+        else {
+            // TestScript 객체 생성 및 콜백 등록
+            TestScript* script = createTestScript();
+            if (script) {
+                std::shared_ptr<TestScript> scriptPtr(script);
+                setTestScript(scriptPtr);  // TestScript 등록
+                script->registerCallback(cb_);
+            }
+            else {
+                LOG_PRINT("TestScript 객체 생성 실패: %ws", TEST_SCRIPT_DLL);
+            }
+            //FreeLibrary(hDLL);  // TestScript.dll 언로드
+        }
     }
 
-    CreateTestScriptFunc createTestScript = (CreateTestScriptFunc)GetProcAddress(hDLL, "CreateTestScript");
-    if (!createTestScript) {
-        LOG_PRINT("CreateTestScript 함수를 찾을 수 없습니다.");
-        FreeLibrary(hDLL);
-        return -1;
+    // 그 다음에 TestScript_00.dll 부터 TestScript_9.dll까지 로드
+    for (int i = 0; i < 10; ++i) {
+        // DLL 이름을 동적으로 생성 (TestScript_0.dll, TestScript_1.dll, ..., TestScript_9.dll)
+        wchar_t dllName[MAX_PATH];
+        swprintf(dllName, MAX_PATH, TEST_SCRIPT_DLL_NAME_FORMAT, i);
+
+        // DLL 로드
+        hDLL = LoadLibrary(dllName);
+        if (!hDLL) {
+            LOG_PRINT("DLL을 로드할 수 없습니다: %ws", dllName);
+            continue;  // 실패한 경우에도 계속 진행
+        }
+
+        // CreateTestScript 함수 포인터 가져오기
+        CreateTestScriptFunc createTestScript = (CreateTestScriptFunc)GetProcAddress(hDLL, "CreateTestScript");
+        if (!createTestScript) {
+            LOG_PRINT("CreateTestScript 함수를 찾을 수 없습니다: %ws", dllName);
+            FreeLibrary(hDLL);
+            continue;
+        }
+
+        // DLL에서 TestScript 객체 생성
+        TestScript* script = createTestScript();
+        if (!script) {
+            LOG_PRINT("TestScript 객체 생성 실패: %ws", dllName);
+            FreeLibrary(hDLL);
+            continue;
+        }
+
+        // TestScript 객체를 TestShell에 등록
+        std::shared_ptr<TestScript> scriptPtr(script);
+        setTestScript(scriptPtr);  // TestScript 등록
+        script->registerCallback(cb_);
+
+        // DLL 언로드
+        //FreeLibrary(hDLL);
     }
-
-    // DLL에서 ShellScript 객체 생성
-    TestScript* script = createTestScript();
-    if (!script) {
-        LOG_PRINT("TestScript 객체 생성 실패");
-        FreeLibrary(hDLL);
-        return -1;
-    }
-
-    // TestScript 객체를 TestShell에 등록
-    std::shared_ptr<TestScript> scriptPtr(script);
-    setTestScript(scriptPtr);  // TestScript 등록
-    script->registerCallback(cb_);
-
-    // DLL 언로드
-    //FreeLibrary(hDLL);
 
     return 0;
 }

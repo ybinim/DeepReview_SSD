@@ -14,7 +14,8 @@
 
 #include "TestScriptCallback.h"
 
-#define TEST_SCRIPT_DLL_NAME L"TestScript.dll"
+#define TEST_SCRIPT_DLL_NAME_FORMAT L"TestScript_%02d.dll"  // 두 자리 숫자 형식
+#define TEST_SCRIPT_DLL L"TestScript.dll"  // 기본 DLL 이름
 
 class TESTSCRIPT_API TestScript {
 public:

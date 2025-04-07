@@ -8,7 +8,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include "TestScriptCallback.h"
+//#include "TestScriptCallback.h"
 
 #ifdef _DEBUG
 int main() {
@@ -26,14 +26,7 @@ int main(int argc, char* argv[]) {
 	static SSDEraser eraser;
 	static SSDFlusher flusher;
 
-	// 2. TestScript에 등록할 콜백 구조체 세팅
-	TestScriptCallback cb;
-	cb.reader = &reader;
-	cb.writer = &writer;
-	cb.eraser = &eraser;
-	cb.flusher = &flusher;
-
-	TestShell* shell = new TestShell(&reader, &writer, &eraser, &flusher, &cb);
+	TestShell* shell = new TestShell(&reader, &writer, &eraser, &flusher);
 
 	if (argc == 1) {
 		while (true) {

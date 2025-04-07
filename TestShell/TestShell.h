@@ -15,11 +15,7 @@ using namespace std;
 class TestShell
 {
 public:
-    TestShell(SSDExecutor* reader, SSDExecutor* writer, SSDExecutor* eraser, SSDExecutor* flusher, TestScriptCallback* cb)
-        : reader(reader), writer(writer), eraser(eraser), flusher(flusher) {
-        cb_ = cb;
-        //std::cout << "cb : " << cb_ << std::endl;
-    }
+    TestShell(SSDExecutor* reader, SSDExecutor* writer, SSDExecutor* eraser, SSDExecutor* flusher);
     int run(string command);
     void setTestScript(std::shared_ptr<TestScript> script);
     int runTestScript(string command);

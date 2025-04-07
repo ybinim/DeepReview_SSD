@@ -139,7 +139,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="framework.h" />
     <ClInclude Include="SSDExecutor.h" />
     <ClInclude Include="TestScriptCallback.h" />
     <ClInclude Include="TestScript.h" />

@@ -187,19 +187,11 @@ public:
 	MockWriter writer;
 	MockEraser eraser;
 	MockFlusher flusher;
-	TestScriptCallback cb;
 	TestShell* shell;
 
 protected:
 	void SetUp() override {
-
-		// 2. 콜백 구조체 세팅
-		cb.reader = &reader;
-		cb.writer = &writer;
-		cb.eraser = &eraser;
-		cb.flusher = &flusher;
-
-		shell = new TestShell(&reader, &writer, &eraser, &flusher, &cb);
+		shell = new TestShell(&reader, &writer, &eraser, &flusher);
 		nandText.clear();
 		outputText = "";
 	}
@@ -492,8 +484,8 @@ TEST_F(TestShellTestFixture, EraseRangeTest)
 
 class MockTestShell : public TestShell {
 public:
-	MockTestShell(SSDExecutor* reader, SSDExecutor* writer, SSDExecutor* eraser, SSDExecutor* flusher, TestScriptCallback* cb) :
-		TestShell{ reader, writer, eraser, flusher, cb } {
+	MockTestShell(SSDExecutor* reader, SSDExecutor* writer, SSDExecutor* eraser, SSDExecutor* flusher) :
+		TestShell{ reader, writer, eraser, flusher } {
 	}
 	MOCK_METHOD(int, readCompare, (string& expected), (override));
 
@@ -501,7 +493,7 @@ public:
 
 TEST_F(TestShellTestFixture, 2_PartialLBAWriteTestWithReadComparePassCondition)
 {
-	MockTestShell mockShell(&reader, &writer, &eraser, &flusher, &cb);
+	MockTestShell mockShell(&reader, &writer, &eraser, &flusher);
 
 	EXPECT_CALL(mockShell, readCompare(_))
 		.Times(150)
@@ -513,7 +505,7 @@ TEST_F(TestShellTestFixture, 2_PartialLBAWriteTestWithReadComparePassCondition)
 
 TEST_F(TestShellTestFixture, 2_PartialLBAWriteTestWithReadCompareFailCondition)
 {
-	MockTestShell mockShell(&reader, &writer, &eraser, &flusher, &cb);
+	MockTestShell mockShell(&reader, &writer, &eraser, &flusher);
 
 	EXPECT_CALL(mockShell, readCompare(_))
 		.Times(1)
@@ -526,7 +518,7 @@ TEST_F(TestShellTestFixture, 2_PartialLBAWriteTestWithReadCompareFailCondition)
 
 TEST_F(TestShellTestFixture, 3_WriteReadAgingValidTest)
 {
-	MockTestShell mockShell(&reader, &writer, &eraser, &flusher, &cb);
+	MockTestShell mockShell(&reader, &writer, &eraser, &flusher);
 
 	EXPECT_CALL(mockShell, readCompare(_))
 		.Times(400)
