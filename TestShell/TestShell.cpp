@@ -7,6 +7,10 @@ using namespace std;
 int TestShell::run(string command) {
     vector<string> param = parseCommand(command, ' ');
     int result = 0;
+    
+    if (command.empty()) {
+        return 0;
+    }
 
     if (param[0].compare("exit") == 0) {
         LOG_PRINT("Exit");
