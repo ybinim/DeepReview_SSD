@@ -1,5 +1,4 @@
-#ifndef WRITESDD_H
-#define WRITESDD_H
+#pragma once
 
 #include "nand.h"
 
@@ -9,5 +8,3 @@ public:
 
 private:
 };
-
-#endif

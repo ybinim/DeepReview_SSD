@@ -19,7 +19,7 @@ public:
 	bool run(std::string input);
 
 private:
-	bool IsInvalidLBA(string lbaStr);
+	bool isInvalidLBA(string lbaStr);
 	bool isInvalidParam(vector<string>& param);
 	void readFileAndUpdateMap(std::map<int, std::string>& map);
 	void loadCommandBuffer();

@@ -63,7 +63,7 @@ bool SSD::run(string input) {
 }
 
 bool
-SSD::IsInvalidLBA(string lbaStr)
+SSD::isInvalidLBA(string lbaStr)
 {
 	int lba = 0;
 	bool ret = false;
@@ -97,7 +97,7 @@ bool SSD::isInvalidParam(vector<string>& param) {
 	else
 	{
 		string lbaStr = param[1];
-		if (IsInvalidLBA(lbaStr))
+		if (isInvalidLBA(lbaStr))
 		{
 			ofstream outputFile(outputfilePath, ios::trunc);
 			outputFile << "ERROR";

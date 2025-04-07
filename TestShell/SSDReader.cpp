@@ -20,7 +20,7 @@ int SSDReader::execute(vector<string>& param, bool print2Console) {
 	}
 
 	if (print2Console) {
-		print2console(lba);
+		print(lba);
 	}
 
 	return ret;
@@ -42,7 +42,7 @@ int SSDReader::checkParam(vector<string>& param) {
 	return 0;
 }
 
-void SSDReader::print2console(string lba) {
+void SSDReader::print(string lba) {
 	ifstream outputFile(outputFilePath.c_str());
 	string data = "";
 	getline(outputFile, data);
