@@ -11,6 +11,7 @@
 #include <vector>
 #include <memory>
 #include <string>
+#include <fstream>
 #include "TestScriptCallback.h" 
 
 #define TEST_SCRIPT_DLL_NAME L"TestScript.dll"
@@ -27,6 +28,8 @@ private:
     int runSSDEraser(int startLBA, int endLBA, bool print2Console);
     int runSSDWriter(int lba, std::string& data, const int& numOfTimes, bool print2Console);
     void printTestScriptResult(int result);
+    int fullWriteAndReadCompare();
+    int readCompare(string& expected);
 };
 
 // 함수 선언 (DLL 내보내기)

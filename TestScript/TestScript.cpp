@@ -1,12 +1,20 @@
 ﻿// ShellScript.cpp
 #include "TestScript.h"
 
+#define SSD_OUTPUT_FILEPATH ("ssd_output.txt")
+
 void TestScript::registerCallback(TestScriptCallback* cb) {
     cb_ = cb;
 }
 
 int TestScript::execute(string command) {
     int result = -1;
+#if 0
+    if ((command.compare("1_FullWriteAndReadCompare") == 0) || (command.compare("1_") == 0)) {
+            result = fullWriteAndReadCompare();
+            printTestScriptResult(result);
+    }
+#endif
     if ((command.compare("5_FullRead") == 0) || (command.compare("5_") == 0)) {
         result = runFullRead();
         printTestScriptResult(result);
@@ -20,9 +28,74 @@ int TestScript::execute(string command) {
     return result;
 }
 
+int TestScript::fullWriteAndReadCompare() {
+    bool print2Console = false;
+    int data = 53681003;
+    string expectedData = "0x";
+    vector<string> writeParam;
+    vector<string> readParam;
+    int result = 0;
+    int lba = 0;
+    const int loopSize = 5;
+
+    while (lba < 100)
+    {
+        expectedData += to_string(data);
+        data += 16;
+        for (int writecount = 0; writecount < loopSize; writecount++)
+        {
+            writeParam.push_back("write");
+            writeParam.push_back(to_string(lba++));
+            writeParam.push_back(expectedData);
+
+            result = cb_->writer->execute(writeParam, print2Console);
+            if (result != 0) {
+                return result;
+            }
+            writeParam.clear();
+        }
+
+        lba = lba - loopSize;
+        for (int comparecount = 0; comparecount < loopSize; comparecount++)
+        {
+            readParam.push_back("read");
+            readParam.push_back(to_string(lba++));
+
+            result = cb_->reader->execute(readParam, print2Console);
+            if (result != 0) {
+                return result;
+            }
+            readParam.clear();
+
+            result = readCompare(expectedData);
+            if (result != 0) {
+                return result;
+            }
+        }
+        expectedData = "0x";
+    }
+
+    return result;
+}
+
+int TestScript::readCompare(string& expected) {
+    ifstream file;
+    file.open(SSD_OUTPUT_FILEPATH);
+    if (file.is_open()) {
+        string actual = "";
+        getline(file, actual);
+        if (expected.compare(actual) == 0) {
+            return 0;
+        }
+        file.close();
+    }
+    return -1;
+}
+
 int TestScript::runFullRead(void)
 {
     if (!cb_ || !cb_->reader) {
+        std::cout << "runFullRead !cb_\n";
         return -1;
     }
 
@@ -39,7 +112,7 @@ int TestScript::runFullRead(void)
             return result;
         }
     }
-    //std::cout << "[FullRead] Done" << endl;
+    std::cout << "[FullRead] Done" << endl;
     return result;
 }
 

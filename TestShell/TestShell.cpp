@@ -1,8 +1,11 @@
-﻿#include "TestShell.h"
+﻿#include <windows.h>   // DLLMain 관련 헤더
+#include "TestShell.h"
 
 #define SSD_OUTPUT_FILEPATH ("ssd_output.txt")
 
 using namespace std;
+
+typedef TestScript* (*CreateTestScriptFunc)(); // DLL에서 TestScript 객체 생성 함수
 
 int TestShell::run(string command) {
     vector<string> param = parseCommand(command, ' ');
@@ -93,7 +96,6 @@ int TestShell::runFullWrite(std::vector<std::string>& param)
 
 int TestShell::runFullRead(void)
 {
-    bool print2console = false;
     int result = 0;
     vector<string> fullReadParam = { "read", "-1"};
     string data = "";
@@ -101,7 +103,7 @@ int TestShell::runFullRead(void)
     for (int i = 0; i < 100; i++) {
         fullReadParam[1] = to_string(i);
 
-        result = reader->execute(fullReadParam, false);
+        result = reader->execute(fullReadParam);
         if (result != 0) {
             return result;
         }
@@ -402,5 +404,45 @@ void TestShell::setTestScript(std::shared_ptr<TestScript> script) {
 }
 
 int TestShell::runTestScript(string command) {
-    return script_->execute(command);
+    int result = -1;
+    result = loadDLLAndRegisterCallback();
+    if (result == 0) {
+        result = script_->execute(command);
+    }
+
+    return result;
+}
+
+int TestShell::loadDLLAndRegisterCallback() {
+    // DLL 로드
+    HMODULE hDLL = LoadLibrary(TEST_SCRIPT_DLL_NAME);
+    if (!hDLL) {
+        LOG_PRINT("DLL을 로드할 수 없습니다.");
+        return -1;
+    }
+
+    CreateTestScriptFunc createTestScript = (CreateTestScriptFunc)GetProcAddress(hDLL, "CreateTestScript");
+    if (!createTestScript) {
+        LOG_PRINT("CreateTestScript 함수를 찾을 수 없습니다.");
+        FreeLibrary(hDLL);
+        return -1;
+    }
+
+    // DLL에서 ShellScript 객체 생성
+    TestScript* script = createTestScript();
+    if (!script) {
+        LOG_PRINT("TestScript 객체 생성 실패");
+        FreeLibrary(hDLL);
+        return -1;
+    }
+
+    // TestScript 객체를 TestShell에 등록
+    std::shared_ptr<TestScript> scriptPtr(script);
+    setTestScript(scriptPtr);  // TestScript 등록
+    script->registerCallback(cb_);
+
+    // DLL 언로드
+    //FreeLibrary(hDLL);
+
+    return 0;
 }
