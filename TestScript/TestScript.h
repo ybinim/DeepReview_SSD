@@ -14,7 +14,8 @@
 #include <fstream>
 #include "TestScriptCallback.h" 
 
-#define TEST_SCRIPT_DLL_NAME L"TestScript.dll"
+#define TEST_SCRIPT_DLL L"TestScript.dll"
+#define TEST_SCRIPT_DLL_NAME_FORMAT L"TestScript_%d.dll"
 
 class TESTSCRIPT_API TestScript {
 public:
@@ -23,13 +24,6 @@ public:
 
 private:
     TestScriptCallback* cb_ = nullptr;
-    int runFullRead();
-    int eraseAndWrite();
-    int runSSDEraser(int startLBA, int endLBA, bool print2Console);
-    int runSSDWriter(int lba, std::string& data, const int& numOfTimes, bool print2Console);
-    void printTestScriptResult(int result);
-    int fullWriteAndReadCompare();
-    int readCompare(string& expected);
 };
 
 // 함수 선언 (DLL 내보내기)

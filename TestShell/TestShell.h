@@ -1,5 +1,4 @@
 ﻿#pragma once
-#pragma once
 #include <string>
 #include <sstream>
 #include <vector>
@@ -34,12 +33,12 @@ private:
     int eraseAndWriteAging();
     int runSSDEraser(int startLBA, const int endLBA, bool print2Console);
     int runSSDWriter(int lba, std::string& data, const int& numOfTimes, bool print2Console);
-    int loadDLLAndRegisterCallback();
+    int loadDLLAndRegisterCallback(const wchar_t* dllName);
 
     std::shared_ptr<TestScript> script_;  // TestScript 객체를 저장할 변수
     SSDExecutor* reader;
     SSDExecutor* writer;
     SSDExecutor* eraser;
     SSDExecutor* flusher;
-    TestScriptCallback* cb_ = nullptr;
+    TestScriptCallback cb = { nullptr, nullptr, nullptr, nullptr };
 };
