@@ -23,6 +23,7 @@ public:
     int execute(string command);
 
 private:
+    int runFullRead(void);
     TestScriptCallback* cb_ = nullptr;
 };
 
